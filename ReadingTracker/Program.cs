@@ -1,10 +1,11 @@
-﻿using ReadingTracker.Classes;
+﻿using ReadingTracker.Repositories;
 using ReadingTracker.Services;
 using Spectre.Console;
 
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-Tracker tracker = new();
+BookLibrary bookLibrary = new();
+Tracker tracker = new(bookLibrary);
 
 int chosenOption = 0;
 

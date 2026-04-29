@@ -1,6 +1,6 @@
 ﻿namespace ReadingTracker.Classes
 {
-    public class Media(string name, int totalChars)
+    internal class Book(string name, int totalChars)
     {
         public string Name { get; private set; } = name;
         public int TotalChars { get; private set; } = totalChars;

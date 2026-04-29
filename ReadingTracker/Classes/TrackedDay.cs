@@ -1,9 +1,9 @@
 ﻿namespace ReadingTracker.Classes
 {
-    public class TrackedDay(Media media, DateOnly date, int charsRead, double minutesRead)
+    internal class TrackedDay(Book book, DateOnly date, int charsRead, double minutesRead)
     {
 
-        public Media Media { get; private set; } = media;
+        public Book Book { get; private set; } = book;
         public DateOnly Date { get; private set; } = date;
         public int CharsRead { get; private set; } = charsRead;
         public double MinutesRead { get; private set; } = minutesRead;
