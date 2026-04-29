@@ -1,11 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ReadingTracker.Classes
+﻿namespace ReadingTracker.Classes
 {
-    internal class Media
+    public class Media(string name, int totalChars)
     {
-        string name;
+        public string Name { get; private set; } = name;
+        public int TotalChars { get; private set; } = totalChars;
+
+        public int ReadChars { get; private set; }
+
+        public bool IsCompleted { get; private set; }
+
+        public double CalculatePercentRead()
+        {
+            if (TotalChars == 0) return 0;
+            return (double) ReadChars / TotalChars * 100;
+        }
+
+        public void UpdateProgress(int charsRead)
+        {
+            ReadChars += charsRead;
+            if (ReadChars >= TotalChars)
+            {
+                ReadChars = TotalChars;
+                IsCompleted = true;
+            }
+        }
     }
 }
