@@ -1,4 +1,5 @@
 ﻿using ReadingTracker.Classes;
+using ReadingTracker.Services;
 using Spectre.Console;
 
 Console.OutputEncoding = System.Text.Encoding.UTF8;
@@ -9,19 +10,19 @@ int chosenOption = 0;
 
 while (chosenOption != 4)
 {
-    tracker.ui.DisplayMenu();
+    ConsoleUI.DisplayMenu();
     if (int.TryParse(Console.ReadLine(), out chosenOption))
     {
         switch (chosenOption)
         {
             case 1:
-                tracker.ui.AddReadingDay(tracker);
+                ConsoleUI.AddReadingDay(tracker);
                 break;
             case 2:
-                tracker.ui.AddBook(tracker);
+                ConsoleUI.AddBook(tracker);
                 break;
             case 3:
-                tracker.PrintSummary();
+                ConsoleUI.PrintSummary(tracker);
                 break;
             case 4:
                 AnsiConsole.MarkupLine("[bold red]Exiting...[/]");
