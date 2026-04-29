@@ -1,11 +1,12 @@
-﻿using Spectre.Console;
+﻿using ReadingTracker.Classes;
+using Spectre.Console;
 
-namespace ReadingTracker.Classes
+namespace ReadingTracker.Services
 {
 
     public class ConsoleUI
     {
-        public void DisplayMenu()
+        public static void DisplayMenu()
         {
             AnsiConsole.WriteLine();
             AnsiConsole.MarkupLine("[bold cyan]Choose an option:[/]");
@@ -15,7 +16,7 @@ namespace ReadingTracker.Classes
             AnsiConsole.MarkupLine("[green]4.[/] Exit");
         }
 
-        public void AddReadingDay(Tracker tracker)
+        public static void AddReadingDay(Tracker tracker)
         {
             if (tracker.GetMediaList().Count == 0)
             {
@@ -35,7 +36,7 @@ namespace ReadingTracker.Classes
             AnsiConsole.MarkupLine("[bold green]Reading day added successfully![/]");
         }
 
-        public void AddBook(Tracker tracker)
+        public static void AddBook(Tracker tracker)
         {
             AnsiConsole.WriteLine();
             string name = AnsiConsole.Ask<string>("Enter the [green]name of the book[/]:");
@@ -60,6 +61,30 @@ namespace ReadingTracker.Classes
             }
 
             return tracker.GetMediaList()[chosen - 1];
+        }
+
+        public static void PrintSummary(Tracker t)
+        {
+
+            var table = new Table();
+
+            table.AddColumn("Date");
+            table.AddColumn("Book");
+            table.AddColumn("Characters Read");
+            table.AddColumn("Minutes Read");
+            table.AddColumn("Percent Read");
+
+            foreach (var day in t.GetAll())
+            {
+                table.AddRow(
+                    day.Date.ToString(),
+                    day.Media.Name,
+                    day.CharsRead.ToString(),
+                    day.MinutesRead.ToString(),
+                    day.Media.CalculatePercentRead().ToString("F2") + "%");
+            }
+
+            AnsiConsole.Write(table);
         }
     }
 }
