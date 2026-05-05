@@ -7,6 +7,8 @@ Console.OutputEncoding = System.Text.Encoding.UTF8;
 BookLibrary bookLibrary = new();
 Tracker tracker = new(bookLibrary);
 
+FileService.Load(tracker);
+
 int chosenOption = 0;
 
 while (chosenOption != 4)
@@ -26,15 +28,16 @@ while (chosenOption != 4)
                 ConsoleUI.PrintSummary(tracker);
                 break;
             case 4:
-                AnsiConsole.MarkupLine("[bold red]Exiting...[/]");
+                FileService.Save(tracker);
+                AnsiConsole.MarkupLine("[bold red]Progresso salvo. Saindo...[/]");
                 break;
             default:
-                AnsiConsole.MarkupLine("[bold yellow]Invalid option. Please try again.[/]");
+                AnsiConsole.MarkupLine("[bold yellow]Opção inválida. Por favor, tente novamente.[/]");
                 break;
         }
     }
     else
     {
-        AnsiConsole.MarkupLine("[bold yellow]Please enter a valid number.[/]");
+        AnsiConsole.MarkupLine("[bold yellow]Por favor, insira um número válido.[/]");
     }
 }

@@ -1,11 +1,20 @@
 ﻿namespace ReadingTracker.Classes
 {
-    internal class TrackedDay(Book book, DateOnly date, int charsRead, double minutesRead)
+    internal class TrackedDay
     {
+        public Book Book { get; set; } = null!; 
+        public DateOnly Date { get; set; }
+        public int CharsRead { get; set; }
+        public double MinutesRead { get; set; }
 
-        public Book Book { get; private set; } = book;
-        public DateOnly Date { get; private set; } = date;
-        public int CharsRead { get; private set; } = charsRead;
-        public double MinutesRead { get; private set; } = minutesRead;
+        public TrackedDay() { }
+
+        public TrackedDay(Book book, DateOnly date, int charsRead, double minutesRead)
+        {
+            Book = book;
+            Date = date;
+            CharsRead = charsRead;
+            MinutesRead = minutesRead;
+        }
     }
 }

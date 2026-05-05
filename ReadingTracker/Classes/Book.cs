@@ -1,18 +1,24 @@
 ﻿namespace ReadingTracker.Classes
 {
-    internal class Book(string name, int totalChars)
+    internal class Book
     {
-        public string Name { get; private set; } = name;
-        public int TotalChars { get; private set; } = totalChars;
+        public string Name { get; set; } = string.Empty;
+        public int TotalChars { get; set; }
+        public int ReadChars { get; set; }
+        public bool IsCompleted { get; set; }
 
-        public int ReadChars { get; private set; }
+        public Book() { }
 
-        public bool IsCompleted { get; private set; }
+        public Book(string name, int totalChars)
+        {
+            Name = name;
+            TotalChars = totalChars;
+        }
 
         public double CalculatePercentRead()
         {
             if (TotalChars == 0) return 0;
-            return (double) ReadChars / TotalChars * 100;
+            return (double)ReadChars / TotalChars * 100;
         }
 
         public void UpdateProgress(int charsRead)

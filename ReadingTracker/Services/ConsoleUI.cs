@@ -10,43 +10,43 @@ namespace ReadingTracker.Services
         public static void DisplayMenu()
         {
             AnsiConsole.WriteLine();
-            AnsiConsole.MarkupLine("[bold cyan]Choose an option:[/]");
-            AnsiConsole.MarkupLine("[green]1.[/] Add new reading day");
-            AnsiConsole.MarkupLine("[green]2.[/] Add new book");
-            AnsiConsole.MarkupLine("[green]3.[/] View summary");
-            AnsiConsole.MarkupLine("[green]4.[/] Exit");
+            AnsiConsole.MarkupLine("[bold cyan]Escolha uma opção:[/]");
+            AnsiConsole.MarkupLine("[green]1.[/] Adicionar novo dia de leitura");
+            AnsiConsole.MarkupLine("[green]2.[/] Adicionar novo livro");
+            AnsiConsole.MarkupLine("[green]3.[/] Ver resumo");
+            AnsiConsole.MarkupLine("[green]4.[/] Sair");
         }
 
         public static void AddReadingDay(Tracker tracker)
         {
             if (tracker.GetBookLibrary().Count == 0)
             {
-                AnsiConsole.MarkupLine("[bold red]No books found. Please add a book before adding a reading day.[/]");
+                AnsiConsole.MarkupLine("[bold red]Nenhum livro encontrado. Adicione um livro antes de adicionar um dia de leitura.[/]");
                 return;
             }
             AnsiConsole.WriteLine();
 
             Book book = PickABook(tracker);
-            int charsRead = AnsiConsole.Ask<int>("Enter the [green]characters read today[/]:");
-            double minutesRead = AnsiConsole.Ask<double>("Enter the [green]minutes read today[/]:");
+            int charsRead = AnsiConsole.Ask<int>("Adicione a quantidade de [green]caracteres lidos hoje[/]:");
+            double minutesRead = AnsiConsole.Ask<double>("Adicione a quantidade de [green]minutos lidos hoje[/]:");
 
             TrackedDay newDay = new(book, DateOnly.FromDateTime(DateTime.Now), charsRead, minutesRead);
     
             tracker.Add(newDay);
     
-            AnsiConsole.MarkupLine("[bold green]Reading day added successfully![/]");
+            AnsiConsole.MarkupLine("[bold green]Dia de leitura adicionado com sucesso![/]");
         }
 
         public static void AddBook(Tracker tracker)
         {
             AnsiConsole.WriteLine();
-            string name = AnsiConsole.Ask<string>("Enter the [green]name of the book[/]:");
-            int totalChars = AnsiConsole.Ask<int>("Enter the [green]total characters in the book[/]:");
+            string name = AnsiConsole.Ask<string>("Adicione o [green]nome do livro[/]:");
+            int totalChars = AnsiConsole.Ask<int>("Adicione a quantidade de [green]caracteres totais no livro[/]:");
             Book newBook = new(name, totalChars);
     
             tracker.GetBookLibrary().Add(newBook);
     
-            AnsiConsole.MarkupLine("[bold green]Book added successfully![/]");
+            AnsiConsole.MarkupLine("[bold green]Livro adicionado com sucesso![/]");
         }
 
         static Book PickABook(Tracker tracker)
@@ -58,7 +58,7 @@ namespace ReadingTracker.Services
 
             while (chosen < 1 || chosen > tracker.GetBookLibrary().Count)
             {
-                chosen = AnsiConsole.Ask<int>("Pick a [green]book[/] from the list above:");
+                chosen = AnsiConsole.Ask<int>("Escolha um [green]livro[/] da lista acima:");
             }
 
             return tracker.GetBookLibrary()[chosen - 1];
@@ -69,12 +69,11 @@ namespace ReadingTracker.Services
 
             var table = new Table();
 
-            table.AddColumn("Date");
-            table.AddColumn("Book");
-            table.AddColumn("Characters Read");
-            table.AddColumn("Minutes Read");
-            table.AddColumn("Percent Read");
-
+            table.AddColumn("Data");
+            table.AddColumn("Livro");
+            table.AddColumn("Caracteres Lidos");
+            table.AddColumn("Minutos Lidos");
+            table.AddColumn("Porcentagem Lida");
             foreach (var day in t.GetAll())
             {
                 table.AddRow(
