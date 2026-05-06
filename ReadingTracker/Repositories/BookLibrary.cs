@@ -1,4 +1,4 @@
-﻿using ReadingTracker.Classes;
+﻿using ReadingTracker.Data;
 using System;
 using System.Collections.Generic;
 using System.Text;

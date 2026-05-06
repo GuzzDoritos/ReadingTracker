@@ -1,4 +1,4 @@
-﻿using ReadingTracker.Classes;
+﻿using ReadingTracker.Data;
 
 namespace ReadingTracker.Repositories
 {

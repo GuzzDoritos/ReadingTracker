@@ -1,20 +1,49 @@
-﻿using ReadingTracker.Classes;
+﻿using ReadingTracker.Data;
 using ReadingTracker.Repositories;
 using Spectre.Console;
 
 namespace ReadingTracker.Services
 {
 
+    
+
     internal class ConsoleUI
     {
-        public static void DisplayMenu()
+
+        public static void Start(Tracker tracker)
         {
-            AnsiConsole.WriteLine();
-            AnsiConsole.MarkupLine("[bold cyan]Escolha uma opção:[/]");
-            AnsiConsole.MarkupLine("[green]1.[/] Adicionar novo dia de leitura");
-            AnsiConsole.MarkupLine("[green]2.[/] Adicionar novo livro");
-            AnsiConsole.MarkupLine("[green]3.[/] Ver resumo");
-            AnsiConsole.MarkupLine("[green]4.[/] Sair");
+            string option = GetOption();
+            while (option != "Sair")
+            {
+                switch (option)
+                {
+                    case "Adicionar novo dia de leitura":
+                        AddReadingDay(tracker);
+                        break;
+                    case "Adicionar novo livro":
+                        AddBook(tracker);
+                        break;
+                    case "Ver resumo":
+                        PrintSummary(tracker);
+                        break;
+                }
+                FileService.Save(tracker);
+                option = GetOption();
+            }
+        }
+
+        public static string GetOption()
+        {
+            return AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Escolha uma opção:")
+                    .AddChoices(
+                        "Adicionar novo dia de leitura",
+                        "Adicionar novo livro",
+                        "Ver resumo",
+                        "Sair"
+                    )
+                );
         }
 
         public static void AddReadingDay(Tracker tracker)
@@ -24,16 +53,41 @@ namespace ReadingTracker.Services
                 AnsiConsole.MarkupLine("[bold red]Nenhum livro encontrado. Adicione um livro antes de adicionar um dia de leitura.[/]");
                 return;
             }
-            AnsiConsole.WriteLine();
 
+            AnsiConsole.WriteLine();
             Book book = PickABook(tracker);
-            int charsRead = AnsiConsole.Ask<int>("Adicione a quantidade de [green]caracteres lidos hoje[/]:");
-            double minutesRead = AnsiConsole.Ask<double>("Adicione a quantidade de [green]minutos lidos hoje[/]:");
+
+            int charsRead = AnsiConsole.Prompt(
+                new TextPrompt<int>("Adicione a quantidade de [green]caracteres lidos hoje[/]:")
+                    .Validate(chars =>
+                    {
+                        if (chars < 0)
+                        {
+                            return ValidationResult.Error("[red]O número de caracteres lidos não pode ser negativo.[/]");
+                        }
+                        if (chars + book.ReadChars > book.TotalChars)
+                        {
+                            return ValidationResult.Error($"[red]Não pode exceder o total do livro ({book.TotalChars}).[/]");
+                        }
+                        return ValidationResult.Success();
+                    })
+            );
+
+            double minutesRead = AnsiConsole.Prompt(
+                new TextPrompt<double>("Adicione a quantidade de [green]minutos lidos hoje[/]:")
+                    .Validate(minutes =>
+                    {
+                        if (minutes < 0)
+                        {
+                            return ValidationResult.Error("[red]O número de minutos lidos não pode ser negativo.[/]");
+                        }
+                        return ValidationResult.Success();
+                    })
+            );
 
             TrackedDay newDay = new(book, DateOnly.FromDateTime(DateTime.Now), charsRead, minutesRead);
-    
             tracker.Add(newDay);
-    
+
             AnsiConsole.MarkupLine("[bold green]Dia de leitura adicionado com sucesso![/]");
         }
 
@@ -51,17 +105,12 @@ namespace ReadingTracker.Services
 
         static Book PickABook(Tracker tracker)
         {
-            int chosen = 0;
-            foreach (Book book in tracker.GetBookLibrary()) { 
-                AnsiConsole.MarkupLine($"[green]{tracker.GetBookLibrary().IndexOf(book) + 1}.[/] {book.Name}");
-            }
-
-            while (chosen < 1 || chosen > tracker.GetBookLibrary().Count)
-            {
-                chosen = AnsiConsole.Ask<int>("Escolha um [green]livro[/] da lista acima:");
-            }
-
-            return tracker.GetBookLibrary()[chosen - 1];
+            return AnsiConsole.Prompt(
+                new SelectionPrompt<Book>()
+                    .Title("Escolha um livro:")
+                    .AddChoices(tracker.GetBookLibrary())
+                    .UseConverter(book => book.Name)
+            );
         }
 
         public static void PrintSummary(Tracker t)

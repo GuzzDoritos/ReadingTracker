@@ -1,4 +1,4 @@
-﻿using ReadingTracker.Classes;
+﻿using ReadingTracker.Data;
 using ReadingTracker.Repositories;
 using Spectre.Console;
 using System.Text.Encodings.Web;
