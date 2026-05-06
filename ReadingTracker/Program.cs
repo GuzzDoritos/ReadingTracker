@@ -1,6 +1,7 @@
-﻿using ReadingTracker.Repositories;
+﻿using ReadingTracker.Data;
+using ReadingTracker.Repositories;
 using ReadingTracker.Services;
-using Spectre.Console;
+using System.Runtime.InteropServices;
 
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
@@ -9,35 +10,12 @@ Tracker tracker = new(bookLibrary);
 
 FileService.Load(tracker);
 
-int chosenOption = 0;
+Series s = new();
+s.Name = "Rezero";
+s.Author = "Tappei";
+s.Genre.Add(Genre.Fantasy);
+s.Books.Add(bookLibrary.GetBookList()[0]);
 
-while (chosenOption != 4)
-{
-    ConsoleUI.DisplayMenu();
-    if (int.TryParse(Console.ReadLine(), out chosenOption))
-    {
-        switch (chosenOption)
-        {
-            case 1:
-                ConsoleUI.AddReadingDay(tracker);
-                break;
-            case 2:
-                ConsoleUI.AddBook(tracker);
-                break;
-            case 3:
-                ConsoleUI.PrintSummary(tracker);
-                break;
-            case 4:
-                FileService.Save(tracker);
-                AnsiConsole.MarkupLine("[bold red]Progresso salvo. Saindo...[/]");
-                break;
-            default:
-                AnsiConsole.MarkupLine("[bold yellow]Opção inválida. Por favor, tente novamente.[/]");
-                break;
-        }
-    }
-    else
-    {
-        AnsiConsole.MarkupLine("[bold yellow]Por favor, insira um número válido.[/]");
-    }
-}
+Console.WriteLine($"{s.Name}, {s.Author}, {s.SeriesID}, {string.Join(", ", s.Genre)}, {string.Join(", ", s.Books.ConvertAll(b => b.Name))}");
+
+ConsoleUI.Start(tracker);
