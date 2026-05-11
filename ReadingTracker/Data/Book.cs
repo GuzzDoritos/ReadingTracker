@@ -10,7 +10,7 @@
 
         public Book() { }
 
-        public Book(string name, int totalChars)
+        internal Book(string name, int totalChars)
         {
             Name = name;
             TotalChars = totalChars;
