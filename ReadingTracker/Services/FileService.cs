@@ -29,7 +29,7 @@ namespace ReadingTracker.Services
 
             SaveData dataToSave = new()
             {
-                Books = tracker.GetBookLibrary(),
+                Books = tracker.GetBookLibrary().GetBookList(),
                 Days = tracker.GetAll()
             };
 
@@ -52,11 +52,9 @@ namespace ReadingTracker.Services
 
             if (loadedData != null)
             {
-                tracker.GetBookLibrary().Clear();
-                tracker.GetAll().Clear();
+                tracker.Clear();
 
-                tracker.GetBookLibrary().AddRange(loadedData.Books);
-                tracker.GetAll().AddRange(loadedData.Days);
+                tracker.Load(loadedData.Books, loadedData.Days);
             }
         }
     }

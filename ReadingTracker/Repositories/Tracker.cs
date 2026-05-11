@@ -15,7 +15,18 @@ namespace ReadingTracker.Repositories
 
         public List<TrackedDay> GetAll() => _days;
 
-        public List<Book> GetBookLibrary() => _bookLibrary.GetBookList();
+        public BookLibrary GetBookLibrary() => _bookLibrary;
 
+        public void Clear()
+        {
+            _days.Clear();
+            _bookLibrary.GetBookList().Clear();
+        }
+
+        public void Load(List<Book> Books, List<TrackedDay> Days)
+        {
+            _days.AddRange(Days);
+            _bookLibrary.Load(Books);
+        }
     }
 }

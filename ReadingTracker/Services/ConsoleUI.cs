@@ -48,7 +48,7 @@ namespace ReadingTracker.Services
 
         public static void AddReadingDay(Tracker tracker)
         {
-            if (tracker.GetBookLibrary().Count == 0)
+            if (tracker.GetBookLibrary().GetBookList().Count == 0)
             {
                 AnsiConsole.MarkupLine("[bold red]Nenhum livro encontrado. Adicione um livro antes de adicionar um dia de leitura.[/]");
                 return;
@@ -73,6 +73,8 @@ namespace ReadingTracker.Services
                     })
             );
 
+            if (charsRead == 0) return;
+
             double minutesRead = AnsiConsole.Prompt(
                 new TextPrompt<double>("Adicione a quantidade de [green]minutos lidos hoje[/]:")
                     .Validate(minutes =>
@@ -96,9 +98,8 @@ namespace ReadingTracker.Services
             AnsiConsole.WriteLine();
             string name = AnsiConsole.Ask<string>("Adicione o [green]nome do livro[/]:");
             int totalChars = AnsiConsole.Ask<int>("Adicione a quantidade de [green]caracteres totais no livro[/]:");
-            Book newBook = new(name, totalChars);
     
-            tracker.GetBookLibrary().Add(newBook);
+            tracker.GetBookLibrary().AddBook(name, totalChars);
     
             AnsiConsole.MarkupLine("[bold green]Livro adicionado com sucesso![/]");
         }
@@ -108,7 +109,7 @@ namespace ReadingTracker.Services
             return AnsiConsole.Prompt(
                 new SelectionPrompt<Book>()
                     .Title("Escolha um livro:")
-                    .AddChoices(tracker.GetBookLibrary())
+                    .AddChoices(tracker.GetBookLibrary().GetBookList())
                     .UseConverter(book => book.Name)
             );
         }
