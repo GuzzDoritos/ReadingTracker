@@ -34,5 +34,21 @@ namespace ReadingTracker.Data
         }
 
         public Series() { }
+
+        public Series(string name, string author)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException("Series name cannot be empty.");
+            }
+            
+            if(string.IsNullOrWhiteSpace(author))
+            {
+                throw new ArgumentException("Author name cannot be empty.");
+            }
+
+            Name = name;
+            Author = author;
+        }
     }
 }
