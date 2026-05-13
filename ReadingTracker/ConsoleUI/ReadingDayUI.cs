@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ReadingTracker.Services.ConsoleUI
+namespace ReadingTracker.ConsoleUI
 {
     internal class ReadingDayUI
     {

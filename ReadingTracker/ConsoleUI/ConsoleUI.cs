@@ -4,7 +4,7 @@ using Spectre.Console;
 using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
 
-namespace ReadingTracker.Services.ConsoleUI
+namespace ReadingTracker.ConsoleUI
 {
     internal class ConsoleUI
     {

@@ -2,7 +2,7 @@
 using ReadingTracker.Repositories;
 using Spectre.Console;
 
-namespace ReadingTracker.Services.ConsoleUI
+namespace ReadingTracker.ConsoleUI
 {
     internal class BookUI
     {
