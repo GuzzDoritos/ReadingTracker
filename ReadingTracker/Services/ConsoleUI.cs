@@ -10,30 +10,37 @@ namespace ReadingTracker.Services
     {
         public static void Start(Tracker tracker)
         {
-            RunMenu("Escolha uma opção:", new()
+            string nomeMenu = "MENU PRINCIPAL";
+            RunMenu(nomeMenu, new()
             {
                 { "Gerenciar dias de leitura", () => ManageReadingDay(tracker) },
                 { "Gerenciar livros", () => ManageBooks(tracker) },
                 { "Imprimir sumário", () => PrintSummary(tracker) },
-                { "Limpar console", () => { AnsiConsole.Clear(); } }
             }, "Sair");
             FileService.Save(tracker);
         }
 
         public static void ManageReadingDay(Tracker tracker)
         {
-            RunMenu("Escolha uma opção:", new()
+            string nomeMenu = "GERENCIAR DIAS DE LEITURA";
+            RunMenu(nomeMenu, new()
             {
                 { "Adicionar um dia de leitura", () => AddReadingDay(tracker) },
-                { "Editar ou remover um dia de leitura", () => { } }
+                { "Editar ou remover um dia de leitura", () => EditReadingDay(tracker) }
             }, "Voltar");
             FileService.Save(tracker);
 
         }
 
+        public static void EditReadingDay(Tracker tracker)
+        {
+            string nomeMenu = "";
+        }
+
         public static void ManageBooks(Tracker tracker)
         {
-            RunMenu("Escolha uma opção:", new()
+            string nomeMenu = "GERENCIAR LIVROS";
+            RunMenu(nomeMenu, new()
             {
                 { "Adicionar livros", () => AddBook(tracker) },
                 { "Remover ou editar livros", () => EditBooks(tracker)  },
@@ -45,40 +52,69 @@ namespace ReadingTracker.Services
 
         public static void EditBooks(Tracker tracker)
         {
+            string nomeMenu = "EDITANDO LIVRO";
             Book book = PickABook(tracker);
 
-            RunMenu($"Escolha uma opção (Livro selecionado: {book.Name}): ", new()
+            RunMenu(nomeMenu, new()
             {
                 { "Editar nome", () =>
                     {
-                        String novoNome = AnsiConsole.Ask<string>("Adicione o [green]nome do livro[/]:", "Livro");
+                        String novoNome = AnsiConsole.Ask<string>("Adicione o [green]nome do livro[/]:", book.Name);
+                        string nomeAnterior = book.Name;
                         book.Name = novoNome;
-                        return;
+                        if (book.Name == nomeAnterior)
+                        {
+                            AnsiConsole.MarkupLine("[yellow]Nome sem alteração.[/]\n");
+                        } else
+                        {
+                            AnsiConsole.MarkupLine($"[green]Alterado com sucesso.[/]\n\nNovo nome: {book.Name}\n");
+                            FileService.Save(tracker);
+                        }                        
                     }
                 },
-                { "Todo", () => {  } }
-            }, "Voltar");
+                { "Remover livro", () => 
+                    { 
+                        if (AnsiConsole.Confirm("Confirma remoção do livro?"))
+                        {
+                            tracker.GetBookLibrary().RemoveBook(book);
+                            AnsiConsole.MarkupLine($"[green]Removido com sucesso.[/]\n");
+                            FileService.Save(tracker);
+                        } else
+                        {
+                            AnsiConsole.MarkupLine("\n[red]Operação cancelada.[/]\n");
+                        }
+                    } 
+                }
+            }, "Voltar", runOnce: true, $"Escolha uma opção (livro selecionado: {book.Name}): ");
         }
 
-        private static void RunMenu(string title, Dictionary<string, Action> options, string exit)
+        private static void RunMenu(string menuName, Dictionary<string, Action> options, string exit, bool runOnce = false, string prompt = "Escolha uma opção:")
         {
             Dictionary<string, Action> cOptions = new(options)
             {
+                { "Limpar console", () => { AnsiConsole.Clear(); } },
                 { exit, () => { } }
             };
-            string choice = GetChoice(title, cOptions);
-            while (choice != exit)
+            string choice = GetChoice(menuName, prompt, cOptions);
+            if (!runOnce)
+            {
+                while (choice != exit)
+                {
+                    cOptions[choice].Invoke();
+                    choice = GetChoice(menuName, prompt, cOptions);
+                }
+            } 
+            else
             {
                 cOptions[choice].Invoke();
-                choice = GetChoice(title, cOptions);
             }
         }
 
-        private static string GetChoice(string title, Dictionary<string, Action> options)
+        private static string GetChoice(string menuName, string prompt, Dictionary<string, Action> options)
         {
             return AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
-                    .Title(title)
+                    .Title($"[green]--{menuName}--[/]\n{prompt}")
                     .AddChoices(options.Keys)
             );
         }
@@ -118,10 +154,51 @@ namespace ReadingTracker.Services
                     })
             );
 
-            TrackedDay newDay = new(book, DateOnly.FromDateTime(DateTime.Now), charsRead, minutesRead);
-            tracker.Add(newDay);
+            DateOnly defaultDate = DateOnly.FromDateTime(DateTime.Now);
 
-            AnsiConsole.MarkupLine("[bold green]Dia de leitura adicionado com sucesso![/]");
+            string dateString = AnsiConsole.Prompt(
+                new TextPrompt<string>("Informe a [green]data de leitura[/]:")
+                    .DefaultValue(defaultDate.ToString())
+                    .Validate(str =>
+                    {
+                        DateOnly aux;
+                        if (!DateOnly.TryParse(str, out aux))
+                        {
+                            return ValidationResult.Error("[red]Formato inválido[/]");
+                        }
+
+                        return ValidationResult.Success();
+                    }));
+
+
+            DateOnly date = DateOnly.Parse(dateString);
+
+
+
+            AnsiConsole.MarkupLine("\n[green]*** NOVO DIA DE LEITURA ***[/]");
+
+
+            AnsiConsole.MarkupLine($"Dia: {date}");
+            AnsiConsole.MarkupLine($"Livro: {book.Name}");
+            AnsiConsole.MarkupLine($"Caracteres lidos: {charsRead}");
+            AnsiConsole.MarkupLine($"Minutos lidos: {minutesRead}");
+
+
+            if (AnsiConsole.Confirm("Confirma as informações acima?"))
+            {
+
+                TrackedDay newDay = new(book, date, charsRead, minutesRead);
+                tracker.Add(newDay);
+
+                FileService.Save(tracker);
+
+                AnsiConsole.MarkupLine("[bold green]Dia de leitura adicionado com sucesso![/]\n");
+
+            }
+            else
+            {
+                AnsiConsole.MarkupLine("\n[red]Operação cancelada.[/]\n");
+            }
         }
 
         public static void AddBook(Tracker tracker)
@@ -129,18 +206,39 @@ namespace ReadingTracker.Services
 
             AnsiConsole.WriteLine();
             string name = AnsiConsole.Ask<string>("Adicione o [green]nome do livro[/]:", "Livro");
+            string author = AnsiConsole.Ask<string>("Informe o [green]nome do autor[/]:", "Autor");
+
+            List<Genre> genres = Enum.GetValues<Genre>().ToList();
+
+            SelectionPrompt<Genre> prompt = new SelectionPrompt<Genre>()
+                                .Title("Selecione um [green]gênero[/]:")
+                                .PageSize(8)
+                                .EnableSearch()
+                                .SearchPlaceholderText("Type to filter...")
+                                .AddChoices(genres);
+
+            Genre genre = AnsiConsole.Prompt(prompt);
+            AnsiConsole.MarkupLine($"Selecione um [green]gênero[/]: {genre}");
+
 
             int totalChars = AnsiConsole.Ask<int>("Adicione a quantidade de [green]caracteres totais no livro[/]:", 10000);
 
-            AnsiConsole.WriteLine(name);
-            AnsiConsole.WriteLine(totalChars);
+            AnsiConsole.MarkupLine("\n[green]*** NOVO LIVRO ***[/]");
+
+
+            AnsiConsole.MarkupLine($"Nome: {name}");
+            AnsiConsole.MarkupLine($"Autor: {author}");
+            AnsiConsole.MarkupLine($"Gênero: {genre.ToString()}");
+            AnsiConsole.MarkupLine($"Total de caracteres: {totalChars}");
 
             if (AnsiConsole.Confirm("Confirma as informações acima?"))
             {
 
-                tracker.GetBookLibrary().AddBook(name, totalChars);
+                tracker.GetBookLibrary().AddBook(name, author, genre, totalChars);
 
                 AnsiConsole.MarkupLine("[bold green]Livro adicionado com sucesso![/]\n");
+
+                FileService.Save(tracker);
 
             }
             else
@@ -157,16 +255,27 @@ namespace ReadingTracker.Services
             table.AddColumn("Nome");
             table.AddColumn("Autor");
             table.AddColumn("Gênero");
+            table.AddColumn("Total de Chars.");
 
             foreach (Book book in tracker.GetBookLibrary().GetBookList())
             {
-                table.AddRow(book.Name);
+                table.AddRow(book.Name, book.Author, book.BookGenre.ToString(), book.TotalChars.ToString());
             }
 
             AnsiConsole.Write(table);
         }
 
         static Book PickABook(Tracker tracker)
+        {
+            return AnsiConsole.Prompt(
+                new SelectionPrompt<Book>()
+                    .Title("Escolha um livro:")
+                    .AddChoices(tracker.GetBookLibrary().GetBookList())
+                    .UseConverter(book => book.Name)
+            );
+        }
+
+        static Book PickAReadingDay(Tracker tracker)
         {
             return AnsiConsole.Prompt(
                 new SelectionPrompt<Book>()
