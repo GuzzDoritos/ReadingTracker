@@ -9,5 +9,6 @@ namespace ReadingTracker.Repositories
         void RemoveBook(int bookId);
         List<TrackedDay> GetDays();
         void AddDay(TrackedDay day);
+        void RemoveDay(DateOnly date, int bookId);
     }
 }

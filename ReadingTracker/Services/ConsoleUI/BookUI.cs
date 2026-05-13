@@ -1,15 +1,12 @@
 ﻿using ReadingTracker.Data;
 using ReadingTracker.Repositories;
 using Spectre.Console;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ReadingTracker.Services.ConsoleUI
 {
     internal class BookUI
     {
-        public static void AddBook(Tracker tracker)
+        public static void AddBook(IReadingRepository tracker)
         {
 
             AnsiConsole.WriteLine();
@@ -41,13 +38,10 @@ namespace ReadingTracker.Services.ConsoleUI
 
             if (AnsiConsole.Confirm("Confirma as informações acima?"))
             {
-
-                tracker.GetBookLibrary().AddBook(name, author, genre, totalChars);
+                Book newBook = new(name, author, genre, totalChars);
+                tracker.AddBook(newBook);
 
                 AnsiConsole.MarkupLine("[bold green]Livro adicionado com sucesso![/]\n");
-
-                JsonRepository.Save(tracker);
-
             }
             else
             {
@@ -55,7 +49,7 @@ namespace ReadingTracker.Services.ConsoleUI
             }
         }
 
-        public static void EditBooks(Tracker tracker)
+        public static void EditBooks(IReadingRepository tracker)
         {
             string nomeMenu = "EDITANDO LIVRO";
             Book book = PickABook(tracker);
@@ -73,7 +67,6 @@ namespace ReadingTracker.Services.ConsoleUI
                         } else
                         {
                             AnsiConsole.MarkupLine($"[green]Alterado com sucesso.[/]\n\nNovo nome: {book.Name}\n");
-                            JsonRepository.Save(tracker);
                         }
                     }
                 },
@@ -81,9 +74,8 @@ namespace ReadingTracker.Services.ConsoleUI
                     {
                         if (AnsiConsole.Confirm("Confirma remoção do livro?"))
                         {
-                            tracker.GetBookLibrary().RemoveBook(book);
+                            tracker.RemoveBook(book.BookID);
                             AnsiConsole.MarkupLine($"[green]Removido com sucesso.[/]\n");
-                            JsonRepository.Save(tracker);
                         } else
                         {
                             AnsiConsole.MarkupLine("\n[red]Operação cancelada.[/]\n");
@@ -103,7 +95,7 @@ namespace ReadingTracker.Services.ConsoleUI
             cOptions[choice].Invoke();
         }
 
-        public static void PrintBooks(Tracker tracker)
+        public static void PrintBooks(IReadingRepository tracker)
         {
             var table = new Table()
                 .RoundedBorder()
@@ -114,7 +106,7 @@ namespace ReadingTracker.Services.ConsoleUI
             table.AddColumn("Gênero");
             table.AddColumn("Total de Chars.");
 
-            foreach (Book book in tracker.GetBookLibrary().GetBookList())
+            foreach (Book book in tracker.GetBooks())
             {
                 table.AddRow(book.Name, book.Author, book.BookGenre.ToString(), book.TotalChars.ToString());
             }
@@ -122,12 +114,12 @@ namespace ReadingTracker.Services.ConsoleUI
             AnsiConsole.Write(table);
         }
 
-        internal static Book PickABook(Tracker tracker)
+        internal static Book PickABook(IReadingRepository tracker)
         {
             return AnsiConsole.Prompt(
                 new SelectionPrompt<Book>()
                     .Title("Escolha um livro:")
-                    .AddChoices(tracker.GetBookLibrary().GetBookList())
+                    .AddChoices(tracker.GetBooks())
                     .UseConverter(book => book.Name)
             );
         }

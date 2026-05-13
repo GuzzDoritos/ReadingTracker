@@ -2,16 +2,16 @@
 {
     internal class TrackedDay
     {
-        public Book Book { get; set; } = null!; 
+        public int BookId { get; set; } 
         public DateOnly Date { get; set; }
         public int CharsRead { get; set; }
         public double MinutesRead { get; set; }
 
         public TrackedDay() { }
 
-        public TrackedDay(Book book, DateOnly date, int charsRead, double minutesRead)
+        public TrackedDay(int bookId, DateOnly date, int charsRead, double minutesRead)
         {
-            Book = book;
+            BookId = bookId;
             Date = date;
             CharsRead = charsRead;
             MinutesRead = minutesRead;

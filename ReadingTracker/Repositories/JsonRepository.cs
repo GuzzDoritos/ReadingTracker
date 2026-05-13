@@ -16,6 +16,42 @@ namespace ReadingTracker.Repositories
 
     internal class JsonRepository : IReadingRepository
     {
+
+        private readonly List<Book> _bookList = [];
+        private readonly List<TrackedDay> _daysList = [];
+
+        public List<Book> GetBooks()
+        {
+            return [.. _bookList];
+        }
+
+        public void AddBook(Book book)
+        {
+            _bookList.Add(book); Save();
+        }
+
+        public void RemoveBook(int bookId)
+        {
+            _bookList.RemoveAll(b => b.BookID == bookId);
+            Save();
+        }
+
+        public List<TrackedDay> GetDays()
+        {
+            return [.. _daysList];
+        }
+
+        void AddDay(TrackedDay day)
+        {
+            _daysList.Add(day); _daysList.Sort((d1, d2) => d1.Date.CompareTo(d2.Date));
+            Save();
+        }
+
+        void RemoveDay(DateOnly date, int bookId)
+        {
+            throw new NotImplementedException();
+        }
+
         private readonly static JsonSerializerOptions options = new()
         {
             Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
@@ -23,13 +59,13 @@ namespace ReadingTracker.Repositories
             ReferenceHandler = ReferenceHandler.Preserve,
             IncludeFields = true
         };
-
-        internal static void Save(Tracker tracker) {
+        internal void Save()
+        {
 
             SaveData dataToSave = new()
             {
-                Books = tracker.GetBookLibrary().GetBookList(),
-                Days = tracker.GetAll()
+                Books = _bookList,
+                Days = _daysList
             };
 
             string jsonString = JsonSerializer.Serialize(dataToSave, options);
@@ -37,9 +73,8 @@ namespace ReadingTracker.Repositories
             File.WriteAllText("data.json", jsonString);
 
         }
-
-        internal static void Load(Tracker tracker) 
-        { 
+        internal void Load()
+        {
             if (!File.Exists("data.json"))
             {
                 AnsiConsole.MarkupLine("[bold red]Nenhum arquivo de salvamento encontrado. Iniciando com um tracker vazio.[/]");
@@ -51,35 +86,13 @@ namespace ReadingTracker.Repositories
 
             if (loadedData != null)
             {
-                tracker.Clear();
+                _bookList.Clear();
+                _daysList.Clear();
 
-                tracker.Load(loadedData.Books, loadedData.Days);
+                _bookList.AddRange(loadedData.Books);
+                _daysList.AddRange(loadedData.Days);
             }
         }
 
-        public List<Book> GetBooks()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void AddBook(Book book)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void RemoveBook(int bookId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public List<TrackedDay> GetDays()
-        {
-            throw new NotImplementedException();
-        }
-
-        static void AddDay(TrackedDay day)
-        {
-            AddDay(day);
-        }
     }
 }

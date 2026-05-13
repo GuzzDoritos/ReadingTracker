@@ -5,9 +5,8 @@ using System.Runtime.InteropServices;
 
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-BookLibrary bookLibrary = new();
-Tracker tracker = new(bookLibrary);
+JsonRepository repo = new();
 
-JsonRepository.Load(tracker);
+repo.Load();
 
-ConsoleUI.Start(tracker);
+ConsoleUI.Start(repo);

@@ -9,16 +9,16 @@ namespace ReadingTracker.Services.ConsoleUI
 {
     internal class ReadingDayUI
     {
-        public static void AddReadingDay(Tracker tracker)
+        public static void AddReadingDay(IReadingRepository repo)
         {
-            if (tracker.GetBookLibrary().GetBookList().Count == 0)
+            if (repo.GetBooks().Count == 0)
             {
                 AnsiConsole.MarkupLine("[bold red]Nenhum livro encontrado. Adicione um livro antes de adicionar um dia de leitura.[/]");
                 return;
             }
 
             AnsiConsole.WriteLine();
-            Book book = BookUI.PickABook(tracker);
+            Book book = BookUI.PickABook(repo);
 
             DateOnly defaultDate = DateOnly.FromDateTime(DateTime.Now);
 
@@ -47,7 +47,7 @@ namespace ReadingTracker.Services.ConsoleUI
                         {
                             return ValidationResult.Error("[red]O número de caracteres lidos não pode ser nulo ou negativo.[/]");
                         }
-                        if (chars + book.ReadChars > book.TotalChars)
+                        if (chars + CalculateAlreadyRead(repo, book) > book.TotalChars)
                         {
                             return ValidationResult.Error($"[red]Não pode exceder o total do livro ({book.TotalChars}).[/]");
                         }
@@ -73,10 +73,8 @@ namespace ReadingTracker.Services.ConsoleUI
             if (AnsiConsole.Confirm("Confirma as informações acima?"))
             {
 
-                TrackedDay newDay = new(book, date, charsRead, minutesRead);
-                tracker.Add(newDay);
-
-                JsonRepository.Save(tracker);
+                TrackedDay newDay = new(book.BookID, date, charsRead, minutesRead);
+                repo.AddDay(newDay);
 
                 AnsiConsole.MarkupLine("[bold green]Dia de leitura adicionado com sucesso![/]\n");
 
@@ -86,15 +84,15 @@ namespace ReadingTracker.Services.ConsoleUI
                 AnsiConsole.MarkupLine("\n[red]Operação cancelada.[/]\n");
             }
         }
-        public static void EditReadingDay(Tracker tracker)
+        public static void EditReadingDay(IReadingRepository repo)
         {
             string nomeMenu = "";
         }
 
-        public static void PrintSummary(Tracker tracker)
+        public static void PrintSummary(IReadingRepository repo)
         {
 
-            if (tracker.GetAll().Count() == 0)
+            if (repo.GetDays().Count == 0)
             {
                 AnsiConsole.MarkupLine("[red]Sem registros.[/]\n");
                 return;
@@ -107,27 +105,36 @@ namespace ReadingTracker.Services.ConsoleUI
             table.AddColumn("Caracteres Lidos");
             table.AddColumn("Minutos Lidos");
             table.AddColumn("Porcentagem Lida");
-            foreach (var day in tracker.GetAll())
+            foreach (var day in repo.GetDays())
             {
+                Book? book = repo.GetBooks().Find(b => b.BookID == day.BookId);
                 table.AddRow(
                     day.Date.ToString(),
-                    day.Book.Name,
+                    book?.Name ?? "--deleted--",
                     day.CharsRead.ToString(),
                     day.MinutesRead.ToString(),
-                    day.Book.CalculatePercentRead().ToString("F2") + "%");
+                    (book != null ? book.CalculatePercentRead(CalculateAlreadyRead(repo, book)).ToString("F2") + "%" : "N/A")
+                    );
             }
 
             AnsiConsole.Write(table);
         }
-        static Book PickAReadingDay(Tracker tracker)
+        static Book PickAReadingDay(IReadingRepository repo)
         {
             return AnsiConsole.Prompt(
                 new SelectionPrompt<Book>()
                     .Title("Escolha um livro:")
-                    .AddChoices(tracker.GetBookLibrary().GetBookList())
+                    .AddChoices(repo.GetBooks())
                     .UseConverter(book => book.Name)
             );
         }
 
+
+        static int CalculateAlreadyRead(IReadingRepository repo, Book book)
+        {
+            return repo.GetDays()
+                .Where(d => d.BookId == book.BookID)
+                .Sum(d => d.CharsRead);
+        }
     }
 }

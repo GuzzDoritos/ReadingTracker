@@ -8,7 +8,7 @@ namespace ReadingTracker.Services.ConsoleUI
 {
     internal class ConsoleUI
     {
-        public static void Start(Tracker tracker)
+        public static void Start(IReadingRepository tracker)
         {
             string nomeMenu = "MENU PRINCIPAL";
             RunMenu(nomeMenu, new()
@@ -17,10 +17,9 @@ namespace ReadingTracker.Services.ConsoleUI
                 { "Gerenciar livros", () => ManageBooks(tracker) },
                 { "Imprimir sumário", () => ReadingDayUI.PrintSummary(tracker) },
             }, "Sair");
-            JsonRepository.Save(tracker);
         }
 
-        public static void ManageReadingDay(Tracker tracker)
+        public static void ManageReadingDay(IReadingRepository tracker)
         {
             string nomeMenu = "GERENCIAR DIAS DE LEITURA";
             RunMenu(nomeMenu, new()
@@ -28,12 +27,11 @@ namespace ReadingTracker.Services.ConsoleUI
                 { "Adicionar um dia de leitura", () => ReadingDayUI.AddReadingDay(tracker) },
                 { "Editar ou remover um dia de leitura", () => ReadingDayUI.EditReadingDay(tracker) }
             }, "Voltar");
-            JsonRepository.Save(tracker);
 
         }
 
 
-        public static void ManageBooks(Tracker tracker)
+        public static void ManageBooks(IReadingRepository tracker)
         {
             string nomeMenu = "GERENCIAR LIVROS";
             RunMenu(nomeMenu, new()
@@ -42,7 +40,6 @@ namespace ReadingTracker.Services.ConsoleUI
                 { "Remover ou editar livros", () => BookUI.EditBooks(tracker)  },
                 { "Listar livros", () => BookUI.PrintBooks(tracker) }
             }, "Voltar");
-            JsonRepository.Save(tracker);
         }
 
 
