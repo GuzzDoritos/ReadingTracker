@@ -94,7 +94,12 @@ namespace ReadingTracker.Services.ConsoleUI
                     "Cancelar", () => { }
                 }
             };
-            string choice = ConsoleUI.GetChoice(nomeMenu, $"Escolha uma opção (livro selecionado: {book.Name}): ", cOptions);
+
+            string choice = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title($"[green]--{nomeMenu}--[/]\nEscolha uma opção (livro selecionado: {book.Name}): ")
+                    .AddChoices(cOptions.Keys)
+            );
             cOptions[choice].Invoke();
         }
 
