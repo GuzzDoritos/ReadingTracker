@@ -55,7 +55,7 @@ namespace ReadingTracker.Services
             string nomeMenu = "EDITANDO LIVRO";
             Book book = PickABook(tracker);
 
-            RunMenu(nomeMenu, new()
+            Dictionary<string, Action> cOptions = new()
             {
                 { "Editar nome", () =>
                     {
@@ -69,11 +69,11 @@ namespace ReadingTracker.Services
                         {
                             AnsiConsole.MarkupLine($"[green]Alterado com sucesso.[/]\n\nNovo nome: {book.Name}\n");
                             FileService.Save(tracker);
-                        }                        
+                        }
                     }
                 },
-                { "Remover livro", () => 
-                    { 
+                { "Remover livro", () =>
+                    {
                         if (AnsiConsole.Confirm("Confirma remoção do livro?"))
                         {
                             tracker.GetBookLibrary().RemoveBook(book);
@@ -83,12 +83,17 @@ namespace ReadingTracker.Services
                         {
                             AnsiConsole.MarkupLine("\n[red]Operação cancelada.[/]\n");
                         }
-                    } 
+                    }
+                },
+                {
+                    "Cancelar", () => { }
                 }
-            }, "Voltar", runOnce: true, $"Escolha uma opção (livro selecionado: {book.Name}): ");
+            };
+            string choice = GetChoice(nomeMenu, $"Escolha uma opção (livro selecionado: {book.Name}): ", cOptions);
+            cOptions[choice].Invoke();
         }
 
-        private static void RunMenu(string menuName, Dictionary<string, Action> options, string exit, bool runOnce = false, string prompt = "Escolha uma opção:")
+        private static void RunMenu(string menuName, Dictionary<string, Action> options, string exit, string prompt = "Escolha uma opção:")
         {
             Dictionary<string, Action> cOptions = new(options)
             {
@@ -96,17 +101,11 @@ namespace ReadingTracker.Services
                 { exit, () => { } }
             };
             string choice = GetChoice(menuName, prompt, cOptions);
-            if (!runOnce)
-            {
-                while (choice != exit)
-                {
-                    cOptions[choice].Invoke();
-                    choice = GetChoice(menuName, prompt, cOptions);
-                }
-            } 
-            else
+
+            while (choice != exit)
             {
                 cOptions[choice].Invoke();
+                choice = GetChoice(menuName, prompt, cOptions);
             }
         }
 
