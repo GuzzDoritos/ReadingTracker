@@ -1,8 +1,11 @@
-﻿namespace ReadingTracker.Data
+﻿using System.Text.Json.Serialization;
+
+namespace ReadingTracker.Data
 {
     internal class Book
     {
-        public int BookID { get; set; }
+        [JsonInclude]
+        public int BookID { get; internal set; }
         public string Name { get; set; } = string.Empty;
         public string Author { get; set; } = string.Empty;
         public Genre BookGenre { get; set; }

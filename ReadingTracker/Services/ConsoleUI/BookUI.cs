@@ -52,7 +52,16 @@ namespace ReadingTracker.Services.ConsoleUI
         public static void EditBooks(IReadingRepository tracker)
         {
             string nomeMenu = "EDITANDO LIVRO";
-            Book book = PickABook(tracker);
+            Book book;
+            if (tracker.GetBooks().Count > 0)
+            {
+                book = PickABook(tracker);
+            }
+            else
+            {
+                AnsiConsole.MarkupLine("[bold red]Nenhum livro encontrado.[/]"); 
+                return;
+            }
 
             Dictionary<string, Action> cOptions = new()
             {

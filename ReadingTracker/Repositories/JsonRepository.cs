@@ -27,7 +27,17 @@ namespace ReadingTracker.Repositories
 
         public void AddBook(Book book)
         {
-            _bookList.Add(book); Save();
+            if (_bookList.Count == 0)
+            {
+                book.BookID = 1;
+            }
+            else
+            {
+                book.BookID = _bookList.Max(b => b.BookID) + 1;
+            }
+
+            _bookList.Add(book); 
+            Save();
         }
 
         public void RemoveBook(int bookId)
@@ -41,13 +51,22 @@ namespace ReadingTracker.Repositories
             return [.. _daysList];
         }
 
-        void AddDay(TrackedDay day)
+        public void AddDay(TrackedDay day)
         {
+            if (_daysList.Count == 0)
+            {
+                day.DayId = 1;
+            }
+            else
+            {
+                day.DayId = _daysList.Max(d => d.DayId) + 1;
+            }
+
             _daysList.Add(day); _daysList.Sort((d1, d2) => d1.Date.CompareTo(d2.Date));
             Save();
         }
 
-        void RemoveDay(DateOnly date, int bookId)
+        public void RemoveDay(int dayId)
         {
             throw new NotImplementedException();
         }
@@ -56,7 +75,6 @@ namespace ReadingTracker.Repositories
         {
             Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
             WriteIndented = true,
-            ReferenceHandler = ReferenceHandler.Preserve,
             IncludeFields = true
         };
         internal void Save()

@@ -1,7 +1,11 @@
-﻿namespace ReadingTracker.Data
+﻿using System.Text.Json.Serialization;
+
+namespace ReadingTracker.Data
 {
     internal class TrackedDay
     {
+        [JsonInclude]
+        public int DayId { get; internal set; }
         public int BookId { get; set; } 
         public DateOnly Date { get; set; }
         public int CharsRead { get; set; }
