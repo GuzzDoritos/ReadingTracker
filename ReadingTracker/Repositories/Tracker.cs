@@ -10,6 +10,7 @@ namespace ReadingTracker.Repositories
         public void Add(TrackedDay day)
         {
             _days.Add(day);
+            _days.Sort((d1, d2) => d1.Date.CompareTo(d2.Date));
             _bookLibrary.GetBookList().Find(m => m.Name == day.Book.Name)?.UpdateProgress(day.CharsRead);
         }
 
