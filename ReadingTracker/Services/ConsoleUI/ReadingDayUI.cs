@@ -76,7 +76,7 @@ namespace ReadingTracker.Services.ConsoleUI
                 TrackedDay newDay = new(book, date, charsRead, minutesRead);
                 tracker.Add(newDay);
 
-                FileService.Save(tracker);
+                JsonRepository.Save(tracker);
 
                 AnsiConsole.MarkupLine("[bold green]Dia de leitura adicionado com sucesso![/]\n");
 

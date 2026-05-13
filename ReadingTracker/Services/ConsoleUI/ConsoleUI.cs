@@ -17,7 +17,7 @@ namespace ReadingTracker.Services.ConsoleUI
                 { "Gerenciar livros", () => ManageBooks(tracker) },
                 { "Imprimir sumário", () => ReadingDayUI.PrintSummary(tracker) },
             }, "Sair");
-            FileService.Save(tracker);
+            JsonRepository.Save(tracker);
         }
 
         public static void ManageReadingDay(Tracker tracker)
@@ -28,7 +28,7 @@ namespace ReadingTracker.Services.ConsoleUI
                 { "Adicionar um dia de leitura", () => ReadingDayUI.AddReadingDay(tracker) },
                 { "Editar ou remover um dia de leitura", () => ReadingDayUI.EditReadingDay(tracker) }
             }, "Voltar");
-            FileService.Save(tracker);
+            JsonRepository.Save(tracker);
 
         }
 
@@ -42,7 +42,7 @@ namespace ReadingTracker.Services.ConsoleUI
                 { "Remover ou editar livros", () => BookUI.EditBooks(tracker)  },
                 { "Listar livros", () => BookUI.PrintBooks(tracker) }
             }, "Voltar");
-            FileService.Save(tracker);
+            JsonRepository.Save(tracker);
         }
 
 

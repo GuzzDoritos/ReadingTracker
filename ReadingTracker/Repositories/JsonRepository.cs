@@ -1,12 +1,11 @@
 ﻿using ReadingTracker.Data;
-using ReadingTracker.Repositories;
 using Spectre.Console;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Unicode;
 
-namespace ReadingTracker.Services
+namespace ReadingTracker.Repositories
 {
 
     internal class SaveData() 
@@ -15,7 +14,7 @@ namespace ReadingTracker.Services
         public List<TrackedDay> Days { get; set; } = [];
     }
 
-    internal class FileService
+    internal class JsonRepository : IReadingRepository
     {
         private readonly static JsonSerializerOptions options = new()
         {
@@ -56,6 +55,31 @@ namespace ReadingTracker.Services
 
                 tracker.Load(loadedData.Books, loadedData.Days);
             }
+        }
+
+        public List<Book> GetBooks()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddBook(Book book)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RemoveBook(int bookId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<TrackedDay> GetDays()
+        {
+            throw new NotImplementedException();
+        }
+
+        static void AddDay(TrackedDay day)
+        {
+            AddDay(day);
         }
     }
 }

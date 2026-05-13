@@ -46,7 +46,7 @@ namespace ReadingTracker.Services.ConsoleUI
 
                 AnsiConsole.MarkupLine("[bold green]Livro adicionado com sucesso![/]\n");
 
-                FileService.Save(tracker);
+                JsonRepository.Save(tracker);
 
             }
             else
@@ -73,7 +73,7 @@ namespace ReadingTracker.Services.ConsoleUI
                         } else
                         {
                             AnsiConsole.MarkupLine($"[green]Alterado com sucesso.[/]\n\nNovo nome: {book.Name}\n");
-                            FileService.Save(tracker);
+                            JsonRepository.Save(tracker);
                         }
                     }
                 },
@@ -83,7 +83,7 @@ namespace ReadingTracker.Services.ConsoleUI
                         {
                             tracker.GetBookLibrary().RemoveBook(book);
                             AnsiConsole.MarkupLine($"[green]Removido com sucesso.[/]\n");
-                            FileService.Save(tracker);
+                            JsonRepository.Save(tracker);
                         } else
                         {
                             AnsiConsole.MarkupLine("\n[red]Operação cancelada.[/]\n");
