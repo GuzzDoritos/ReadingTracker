@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace ReadingTracker.Data
+namespace ReadingTrackerConsole.Data
 {
-    internal class Book
+    public class Book
     {
         [JsonInclude]
         public int BookID { get; internal set; }

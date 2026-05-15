@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace ReadingTracker.Data
+namespace ReadingTrackerConsole.Data
 {
-    internal class TrackedDay
+    public class TrackedDay
     {
         [JsonInclude]
         public int DayId { get; internal set; }

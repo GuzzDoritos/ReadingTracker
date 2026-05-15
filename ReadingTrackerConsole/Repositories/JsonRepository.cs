@@ -1,11 +1,10 @@
-﻿using ReadingTracker.Data;
+﻿using ReadingTrackerConsole.Data;
 using Spectre.Console;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Text.Unicode;
 
-namespace ReadingTracker.Repositories
+namespace ReadingTrackerConsole.Repositories
 {
 
     internal class SaveData() 
@@ -14,7 +13,7 @@ namespace ReadingTracker.Repositories
         public List<TrackedDay> Days { get; set; } = [];
     }
 
-    internal class JsonRepository : IReadingRepository
+    public class JsonRepository : IReadingRepository
     {
 
         private readonly List<Book> _bookList = [];
@@ -68,7 +67,8 @@ namespace ReadingTracker.Repositories
 
         public void RemoveDay(int dayId)
         {
-            throw new NotImplementedException();
+            _daysList.RemoveAll(d => d.DayId == dayId);
+            Save();
         }
 
         private readonly static JsonSerializerOptions options = new()

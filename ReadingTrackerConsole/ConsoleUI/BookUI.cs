@@ -1,14 +1,14 @@
-﻿using ReadingTracker.Data;
-using ReadingTracker.Repositories;
+﻿using ReadingTrackerConsole.Data;
+using ReadingTrackerConsole.Repositories;
 using Spectre.Console;
 
-namespace ReadingTracker.ConsoleUI
+namespace ReadingTrackerConsole.ConsoleUI
 {
     internal class BookUI
     {
         public static void AddBook(IReadingRepository tracker)
         {
-
+            AnsiConsole.Clear();
             AnsiConsole.WriteLine();
             string name = AnsiConsole.Ask<string>("Adicione o [green]nome do livro[/]:", "Livro");
             string author = AnsiConsole.Ask<string>("Informe o [green]nome do autor[/]:", "Autor");
@@ -41,10 +41,12 @@ namespace ReadingTracker.ConsoleUI
                 Book newBook = new(name, author, genre, totalChars);
                 tracker.AddBook(newBook);
 
+                AnsiConsole.Clear();
                 AnsiConsole.MarkupLine("[bold green]Livro adicionado com sucesso![/]\n");
             }
             else
             {
+                AnsiConsole.Clear();
                 AnsiConsole.MarkupLine("\n[red]Operação cancelada.[/]\n");
             }
         }
@@ -59,6 +61,7 @@ namespace ReadingTracker.ConsoleUI
             }
             else
             {
+                AnsiConsole.Clear();
                 AnsiConsole.MarkupLine("[bold red]Nenhum livro encontrado.[/]"); 
                 return;
             }
@@ -72,9 +75,11 @@ namespace ReadingTracker.ConsoleUI
                         book.Name = novoNome;
                         if (book.Name == nomeAnterior)
                         {
+                            AnsiConsole.Clear();
                             AnsiConsole.MarkupLine("[yellow]Nome sem alteração.[/]\n");
                         } else
                         {
+                            AnsiConsole.Clear();
                             AnsiConsole.MarkupLine($"[green]Alterado com sucesso.[/]\n\nNovo nome: {book.Name}\n");
                         }
                     }
@@ -84,9 +89,11 @@ namespace ReadingTracker.ConsoleUI
                         if (AnsiConsole.Confirm("Confirma remoção do livro?"))
                         {
                             tracker.RemoveBook(book.BookID);
+                            AnsiConsole.Clear();
                             AnsiConsole.MarkupLine($"[green]Removido com sucesso.[/]\n");
                         } else
                         {
+                            AnsiConsole.Clear();
                             AnsiConsole.MarkupLine("\n[red]Operação cancelada.[/]\n");
                         }
                     }
@@ -106,21 +113,30 @@ namespace ReadingTracker.ConsoleUI
 
         public static void PrintBooks(IReadingRepository tracker)
         {
-            var table = new Table()
-                .RoundedBorder()
-                .BorderColor(Color.Grey);
-
-            table.AddColumn("Nome");
-            table.AddColumn("Autor");
-            table.AddColumn("Gênero");
-            table.AddColumn("Total de Chars.");
-
-            foreach (Book book in tracker.GetBooks())
+            AnsiConsole.Clear();
+            if (tracker.GetBooks().Count == 0)
             {
-                table.AddRow(book.Name, book.Author, book.BookGenre.ToString(), book.TotalChars.ToString());
+                AnsiConsole.Write("Sem livros cadastrados.");
+            }
+            else
+            {
+                var table = new Table()
+                    .RoundedBorder()
+                    .BorderColor(Color.Grey);
+
+                table.AddColumn("Nome");
+                table.AddColumn("Autor");
+                table.AddColumn("Gênero");
+                table.AddColumn("Total de Chars.");
+
+                foreach (Book book in tracker.GetBooks())
+                {
+                    table.AddRow(book.Name, book.Author, book.BookGenre.ToString(), book.TotalChars.ToString());
+                }
+
+                AnsiConsole.Write(table);
             }
 
-            AnsiConsole.Write(table);
         }
 
         internal static Book PickABook(IReadingRepository tracker)

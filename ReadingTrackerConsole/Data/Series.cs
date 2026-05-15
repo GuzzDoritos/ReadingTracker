@@ -1,6 +1,6 @@
-﻿namespace ReadingTracker.Data
+﻿namespace ReadingTrackerConsole.Data
 {
-    internal class Series
+    public class Series
     {
         public int SeriesID { get; private set; } = Guid.NewGuid().GetHashCode();
         public string Name { get; private set; } = string.Empty;

@@ -1,7 +1,5 @@
-﻿using ReadingTracker.ConsoleUI;
-using ReadingTracker.Data;
-using ReadingTracker.Repositories;
-using System.Runtime.InteropServices;
+﻿using ReadingTrackerConsole.ConsoleUI;
+using ReadingTrackerConsole.Repositories;
 
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 

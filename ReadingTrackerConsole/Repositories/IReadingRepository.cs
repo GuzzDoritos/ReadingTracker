@@ -1,8 +1,8 @@
-﻿using ReadingTracker.Data;
+﻿using ReadingTrackerConsole.Data;
 
-namespace ReadingTracker.Repositories
+namespace ReadingTrackerConsole.Repositories
 {
-    internal interface IReadingRepository
+    public interface IReadingRepository
     {
         List<Book> GetBooks();
         void AddBook(Book book);

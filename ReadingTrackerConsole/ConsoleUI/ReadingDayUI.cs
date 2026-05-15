@@ -1,11 +1,8 @@
-﻿using ReadingTracker.Data;
-using ReadingTracker.Repositories;
+﻿using ReadingTrackerConsole.Data;
+using ReadingTrackerConsole.Repositories;
 using Spectre.Console;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace ReadingTracker.ConsoleUI
+namespace ReadingTrackerConsole.ConsoleUI
 {
     internal class ReadingDayUI
     {
@@ -47,7 +44,7 @@ namespace ReadingTracker.ConsoleUI
                         {
                             return ValidationResult.Error("[red]O número de caracteres lidos não pode ser nulo ou negativo.[/]");
                         }
-                        if (chars + CalculateAlreadyRead(repo, book) > book.TotalChars)
+                        if (chars + repo.CalculateAlreadyRead(book) > book.TotalChars)
                         {
                             return ValidationResult.Error($"[red]Não pode exceder o total do livro ({book.TotalChars}).[/]");
                         }
@@ -76,21 +73,76 @@ namespace ReadingTracker.ConsoleUI
                 TrackedDay newDay = new(book.BookID, date, charsRead, minutesRead);
                 repo.AddDay(newDay);
 
+                AnsiConsole.Clear();
                 AnsiConsole.MarkupLine("[bold green]Dia de leitura adicionado com sucesso![/]\n");
 
             }
             else
             {
+                AnsiConsole.Clear();
                 AnsiConsole.MarkupLine("\n[red]Operação cancelada.[/]\n");
             }
         }
         public static void EditReadingDay(IReadingRepository repo)
         {
-            string nomeMenu = "";
+            string nomeMenu = "EDITANDO DIA DE LEITURA";
+            TrackedDay day;
+            if (repo.GetDays().Count > 0)
+            {
+                day = PickAReadingDay(repo);
+            }
+            else
+            {
+                AnsiConsole.MarkupLine("[bold red]Nenhum dia de leitura registrado.[/]");
+                return;
+            }
+
+            Dictionary<string, Action> cOptions = new()
+            {
+                { "Alterar livro", () =>
+                    {
+                        Book newBook = BookUI.PickABook(repo);
+                        int prevBook = day.BookId;
+                        day.BookId = newBook.BookID;
+                        if (day.BookId == prevBook)
+                        {
+                            AnsiConsole.MarkupLine("[yellow]Esse livro já é o selecionado.[/]\n");
+                        } else
+                        {
+                            AnsiConsole.MarkupLine($"[green]Alterado com sucesso.[/]\n\nNovo livro: {newBook.Name}\n");
+                        }
+                    }
+                },
+                { "Remover livro", () =>
+                    {
+                        if (AnsiConsole.Confirm("Confirma remoção do dia?"))
+                        {
+                            repo.RemoveDay(day.DayId);
+                            AnsiConsole.Clear();
+                            AnsiConsole.MarkupLine($"[green]Removido com sucesso.[/]\n");
+                        } else
+                        {
+                            AnsiConsole.Clear();
+                            AnsiConsole.MarkupLine("\n[red]Operação cancelada.[/]\n");
+                        }
+                    }
+                },
+                {
+                    "Cancelar", () => { }
+                }
+            };
+
+            string choice = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title($"[green]--{nomeMenu}--[/]\nEscolha uma opção (dia selecionado: {day.Date}): ")
+                    .AddChoices(cOptions.Keys)
+            );
+            cOptions[choice].Invoke();
         }
 
         public static void PrintSummary(IReadingRepository repo)
         {
+            AnsiConsole.Clear();
 
             if (repo.GetDays().Count == 0)
             {
@@ -119,13 +171,13 @@ namespace ReadingTracker.ConsoleUI
 
             AnsiConsole.Write(table);
         }
-        static Book PickAReadingDay(IReadingRepository repo)
+        static TrackedDay PickAReadingDay(IReadingRepository repo)
         {
             return AnsiConsole.Prompt(
-                new SelectionPrompt<Book>()
-                    .Title("Escolha um livro:")
-                    .AddChoices(repo.GetBooks())
-                    .UseConverter(book => book.Name)
+                new SelectionPrompt<TrackedDay>()
+                    .Title("Escolha um dia:")
+                    .AddChoices(repo.GetDays())
+                    .UseConverter(day => $"{day.Date} - {repo.GetBooks().Find(book => book.BookID == day.BookId)?.Name ?? "--deleted--"}")
             );
         }
 

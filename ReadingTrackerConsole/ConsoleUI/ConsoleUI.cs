@@ -1,10 +1,7 @@
-﻿using ReadingTracker.Data;
-using ReadingTracker.Repositories;
+﻿using ReadingTrackerConsole.Repositories;
 using Spectre.Console;
-using System.Runtime.CompilerServices;
-using System.Xml.Serialization;
 
-namespace ReadingTracker.ConsoleUI
+namespace ReadingTrackerConsole.ConsoleUI
 {
     internal class ConsoleUI
     {
