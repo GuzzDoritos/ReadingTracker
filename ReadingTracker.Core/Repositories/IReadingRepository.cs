@@ -1,6 +1,6 @@
-﻿using ReadingTrackerConsole.Data;
+﻿using ReadingTracker.Core.Data;
 
-namespace ReadingTrackerConsole.Repositories
+namespace ReadingTracker.Core.Repositories
 {
     public interface IReadingRepository
     {

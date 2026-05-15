@@ -1,7 +1,6 @@
-﻿using ReadingTrackerConsole.Data;
-using ReadingTrackerConsole.Repositories;
+﻿using ReadingTracker.Core.Data;
 
-namespace ReadingTrackerConsole.Tests
+namespace ReadingTracker.Core.Tests
 {
     public class BookTests
     {

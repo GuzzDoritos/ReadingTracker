@@ -1,9 +1,8 @@
-﻿using ReadingTrackerConsole.Data;
-using ReadingTrackerConsole.Repositories;
-using ReadingTrackerConsole.Services;
+﻿using ReadingTracker.Core.Data;
+using ReadingTracker.Core.Services;
 using Spectre.Console;
 
-namespace ReadingTrackerConsole.ConsoleUI
+namespace ReadingTracker.Core.ConsoleUI
 {
     internal class ReadingDayUI
     {

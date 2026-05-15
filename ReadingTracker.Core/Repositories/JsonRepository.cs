@@ -1,10 +1,9 @@
-﻿using ReadingTrackerConsole.Data;
-using Spectre.Console;
+﻿using ReadingTracker.Core.Data;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Unicode;
 
-namespace ReadingTrackerConsole.Repositories
+namespace ReadingTracker.Core.Repositories
 {
 
     internal class SaveData()
@@ -91,12 +90,11 @@ namespace ReadingTrackerConsole.Repositories
             File.WriteAllText("data.json", jsonString);
 
         }
-        internal void Load()
+        public string? Load()
         {
             if (!File.Exists("data.json"))
             {
-                AnsiConsole.MarkupLine("[bold red]Nenhum arquivo de salvamento encontrado. Iniciando com um tracker vazio.[/]");
-                return;
+                return "Nenhum arquivo de salvamento encontrado. Iniciando com um tracker vazio.";
             }
 
             string jsonString = File.ReadAllText("data.json");
@@ -110,6 +108,7 @@ namespace ReadingTrackerConsole.Repositories
                 _bookList.AddRange(loadedData.Books);
                 _daysList.AddRange(loadedData.Days);
             }
+            return null;
         }
 
 

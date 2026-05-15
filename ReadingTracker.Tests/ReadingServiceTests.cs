@@ -1,7 +1,8 @@
-﻿using ReadingTrackerConsole.Data;
-using ReadingTrackerConsole.Services;
+﻿using ReadingTracker.Core.Data;
+using ReadingTracker.Core.Services;
+using ReadingTracker.Core.Tests;
 
-namespace ReadingTrackerConsole.Tests
+namespace ReadingTracker.Tests
 {
     public class ReadingServiceTests
     {

@@ -1,4 +1,4 @@
-﻿namespace ReadingTrackerConsole.Data
+﻿namespace ReadingTracker.Core.Data
 {
     public class Series
     {

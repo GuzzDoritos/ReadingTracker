@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace ReadingTrackerConsole.Data
+namespace ReadingTracker.Core.Data
 {
     public class TrackedDay
     {

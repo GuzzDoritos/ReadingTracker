@@ -1,7 +1,7 @@
-﻿using ReadingTrackerConsole.Data;
-using ReadingTrackerConsole.Repositories;
+﻿using ReadingTracker.Core.Data;
+using ReadingTracker.Core.Repositories;
 
-namespace ReadingTrackerConsole.Services
+namespace ReadingTracker.Core.Services
 {
     public class ReadingService(IReadingRepository repository)
     {

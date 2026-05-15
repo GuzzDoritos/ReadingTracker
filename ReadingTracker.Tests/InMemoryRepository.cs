@@ -1,7 +1,7 @@
-﻿using ReadingTrackerConsole.Data;
-using ReadingTrackerConsole.Repositories;
+﻿using ReadingTracker.Core.Data;
+using ReadingTracker.Core.Repositories;
 
-namespace ReadingTrackerConsole.Tests
+namespace ReadingTracker.Core.Tests
 {
     internal class InMemoryRepository : IReadingRepository
     {

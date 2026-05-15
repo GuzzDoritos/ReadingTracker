@@ -1,4 +1,4 @@
-﻿namespace ReadingTrackerConsole.Data;
+﻿namespace ReadingTracker.Core.Data;
 
 public enum Genre
 {

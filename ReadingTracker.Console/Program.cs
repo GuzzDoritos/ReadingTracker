@@ -1,12 +1,14 @@
-﻿using ReadingTrackerConsole.ConsoleUI;
-using ReadingTrackerConsole.Repositories;
-using ReadingTrackerConsole.Services;
+﻿using ReadingTracker.Console.ConsoleUI;
+using ReadingTracker.Core.Repositories;
+using ReadingTracker.Core.Services;
+using Spectre.Console;
 
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
 JsonRepository repo = new();
 
-repo.Load();
+string? error = repo.Load();
+if (error != null) AnsiConsole.Write($"[red]{error}[/]");
 
 ReadingService tracker = new(repo);
 

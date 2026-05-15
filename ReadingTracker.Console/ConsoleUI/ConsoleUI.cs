@@ -1,8 +1,8 @@
-﻿using ReadingTrackerConsole.Repositories;
-using ReadingTrackerConsole.Services;
+﻿using ReadingTracker.Core.ConsoleUI;
+using ReadingTracker.Core.Services;
 using Spectre.Console;
 
-namespace ReadingTrackerConsole.ConsoleUI
+namespace ReadingTracker.Console.ConsoleUI
 {
     internal class ConsoleUI
     {

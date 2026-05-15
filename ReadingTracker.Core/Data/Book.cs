@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace ReadingTrackerConsole.Data
+namespace ReadingTracker.Core.Data
 {
     public class Book
     {
@@ -14,7 +14,7 @@ namespace ReadingTrackerConsole.Data
 
         public Book() { }
 
-        internal Book(string name, string author, Genre genre, int totalChars)
+        public Book(string name, string author, Genre genre, int totalChars)
         {
             Name = name;
             Author = author;
