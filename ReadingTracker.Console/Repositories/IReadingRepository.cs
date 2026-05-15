@@ -11,6 +11,5 @@ namespace ReadingTrackerConsole.Repositories
         void AddDay(TrackedDay day);
         void RemoveDay(int dayId);
 
-        int CalculateAlreadyRead(Book book);
     }
 }

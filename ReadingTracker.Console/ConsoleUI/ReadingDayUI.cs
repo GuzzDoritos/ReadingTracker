@@ -1,12 +1,13 @@
 ﻿using ReadingTrackerConsole.Data;
 using ReadingTrackerConsole.Repositories;
+using ReadingTrackerConsole.Services;
 using Spectre.Console;
 
 namespace ReadingTrackerConsole.ConsoleUI
 {
     internal class ReadingDayUI
     {
-        public static void AddReadingDay(IReadingRepository repo)
+        public static void AddReadingDay(ReadingService repo)
         {
             if (repo.GetBooks().Count == 0)
             {
@@ -40,14 +41,9 @@ namespace ReadingTrackerConsole.ConsoleUI
                 new TextPrompt<int>("Adicione a quantidade de [green]caracteres lidos hoje[/]:")
                     .Validate(chars =>
                     {
-                        if (chars <= 0)
-                        {
-                            return ValidationResult.Error("[red]O número de caracteres lidos não pode ser nulo ou negativo.[/]");
-                        }
-                        if (chars + repo.CalculateAlreadyRead(book) > book.TotalChars)
-                        {
-                            return ValidationResult.Error($"[red]Não pode exceder o total do livro ({book.TotalChars}).[/]");
-                        }
+                        string? error = repo.ValidateCharsRead(book, chars);
+                        if (error != null)
+                            return ValidationResult.Error($"[red]{error}[/]");
                         return ValidationResult.Success();
                     })
             );
@@ -56,7 +52,9 @@ namespace ReadingTrackerConsole.ConsoleUI
                 new TextPrompt<double>("Adicione a quantidade de [green]minutos lidos hoje[/]:")
                     .Validate(minutes =>
                     {
-                        if (minutes < 0) return ValidationResult.Error("[red]O número de minutos lidos não pode ser negativo.[/]");
+                        string? error = ReadingService.ValidateMinsRead(minutes);
+                        if (error != null)
+                            return ValidationResult.Error($"[red]{error}[/]");
                         return ValidationResult.Success();
                     })
             );
@@ -83,11 +81,11 @@ namespace ReadingTrackerConsole.ConsoleUI
                 AnsiConsole.MarkupLine("\n[red]Operação cancelada.[/]\n");
             }
         }
-        public static void EditReadingDay(IReadingRepository repo)
+        public static void EditReadingDay(ReadingService repo)
         {
             string nomeMenu = "EDITANDO DIA DE LEITURA";
             TrackedDay day;
-            if (repo.GetDays().Count > 0)
+            if (repo.GetDays().Any())
             {
                 day = PickAReadingDay(repo);
             }
@@ -140,7 +138,7 @@ namespace ReadingTrackerConsole.ConsoleUI
             cOptions[choice].Invoke();
         }
 
-        public static void PrintSummary(IReadingRepository repo)
+        public static void PrintSummary(ReadingService repo)
         {
             AnsiConsole.Clear();
 
@@ -171,7 +169,7 @@ namespace ReadingTrackerConsole.ConsoleUI
 
             AnsiConsole.Write(table);
         }
-        static TrackedDay PickAReadingDay(IReadingRepository repo)
+        static TrackedDay PickAReadingDay(ReadingService repo)
         {
             return AnsiConsole.Prompt(
                 new SelectionPrompt<TrackedDay>()

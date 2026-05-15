@@ -30,7 +30,7 @@ namespace ReadingTrackerConsole.Tests
         [Fact]
         public void TestIdGeneration_AddBook()
         {
-            JsonRepository repo = new();
+            InMemoryRepository repo = new();
             Book book1 = new();
             Book book2 = new();
 

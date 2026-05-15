@@ -5,8 +5,8 @@ namespace ReadingTrackerConsole.Data
     public class TrackedDay
     {
         [JsonInclude]
-        public int DayId { get; internal set; }
-        public int BookId { get; set; } 
+        public int DayId { get; set; }
+        public int BookId { get; set; }
         public DateOnly Date { get; set; }
         public int CharsRead { get; set; }
         public double MinutesRead { get; set; }

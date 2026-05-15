@@ -7,7 +7,7 @@ using System.Text.Unicode;
 namespace ReadingTrackerConsole.Repositories
 {
 
-    internal class SaveData() 
+    internal class SaveData()
     {
         public List<Book> Books { get; set; } = [];
         public List<TrackedDay> Days { get; set; } = [];
@@ -35,7 +35,7 @@ namespace ReadingTrackerConsole.Repositories
                 book.BookID = _bookList.Max(b => b.BookID) + 1;
             }
 
-            _bookList.Add(book); 
+            _bookList.Add(book);
             Save();
         }
 
@@ -112,11 +112,6 @@ namespace ReadingTrackerConsole.Repositories
             }
         }
 
-        public int CalculateAlreadyRead(Book book)
-        {
-            return GetDays()
-                .Where(d => d.BookId == book.BookID)
-                .Sum(d => d.CharsRead);
-        }
+
     }
 }

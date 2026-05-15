@@ -1,12 +1,13 @@
 ﻿using ReadingTrackerConsole.Data;
 using ReadingTrackerConsole.Repositories;
+using ReadingTrackerConsole.Services;
 using Spectre.Console;
 
 namespace ReadingTrackerConsole.ConsoleUI
 {
     internal class BookUI
     {
-        public static void AddBook(IReadingRepository tracker)
+        public static void AddBook(ReadingService tracker)
         {
             AnsiConsole.Clear();
             AnsiConsole.WriteLine();
@@ -51,18 +52,18 @@ namespace ReadingTrackerConsole.ConsoleUI
             }
         }
 
-        public static void EditBooks(IReadingRepository tracker)
+        public static void EditBooks(ReadingService tracker)
         {
             string nomeMenu = "EDITANDO LIVRO";
             Book book;
-            if (tracker.GetBooks().Count > 0)
+            if (tracker.GetBooks().Count != 0)
             {
                 book = PickABook(tracker);
             }
             else
             {
                 AnsiConsole.Clear();
-                AnsiConsole.MarkupLine("[bold red]Nenhum livro encontrado.[/]"); 
+                AnsiConsole.MarkupLine("[bold red]Nenhum livro encontrado.[/]");
                 return;
             }
 
@@ -111,7 +112,7 @@ namespace ReadingTrackerConsole.ConsoleUI
             cOptions[choice].Invoke();
         }
 
-        public static void PrintBooks(IReadingRepository tracker)
+        public static void PrintBooks(ReadingService tracker)
         {
             AnsiConsole.Clear();
             if (tracker.GetBooks().Count == 0)
@@ -139,7 +140,7 @@ namespace ReadingTrackerConsole.ConsoleUI
 
         }
 
-        internal static Book PickABook(IReadingRepository tracker)
+        internal static Book PickABook(ReadingService tracker)
         {
             return AnsiConsole.Prompt(
                 new SelectionPrompt<Book>()

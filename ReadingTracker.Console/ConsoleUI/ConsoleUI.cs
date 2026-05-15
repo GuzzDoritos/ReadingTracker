@@ -1,11 +1,12 @@
 ﻿using ReadingTrackerConsole.Repositories;
+using ReadingTrackerConsole.Services;
 using Spectre.Console;
 
 namespace ReadingTrackerConsole.ConsoleUI
 {
     internal class ConsoleUI
     {
-        public static void Start(IReadingRepository tracker)
+        public static void Start(ReadingService tracker)
         {
             string nomeMenu = "MENU PRINCIPAL";
             RunMenu(nomeMenu, new()
@@ -16,7 +17,7 @@ namespace ReadingTrackerConsole.ConsoleUI
             }, "Sair");
         }
 
-        public static void ManageReadingDay(IReadingRepository tracker)
+        public static void ManageReadingDay(ReadingService tracker)
         {
             string nomeMenu = "GERENCIAR DIAS DE LEITURA";
             RunMenu(nomeMenu, new()
@@ -28,7 +29,7 @@ namespace ReadingTrackerConsole.ConsoleUI
         }
 
 
-        public static void ManageBooks(IReadingRepository tracker)
+        public static void ManageBooks(ReadingService tracker)
         {
             string nomeMenu = "GERENCIAR LIVROS";
             RunMenu(nomeMenu, new()

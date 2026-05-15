@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="ReadingTracker.Tests/ReadingTracker.Tests.csproj" Id="afc07fa4-ef1f-4268-9076-897c88484374" />
+  <Project Path="ReadingTracker.Console/ReadingTracker.Console.csproj" />
+</Solution>

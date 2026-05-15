@@ -36,8 +36,8 @@
             {
                 throw new ArgumentException("Series name cannot be empty.");
             }
-            
-            if(string.IsNullOrWhiteSpace(author))
+
+            if (string.IsNullOrWhiteSpace(author))
             {
                 throw new ArgumentException("Author name cannot be empty.");
             }
