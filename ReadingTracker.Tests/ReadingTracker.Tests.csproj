@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ReadingTracker.Console\ReadingTracker.Console.csproj" />
+    <ProjectReference Include="..\ReadingTracker.Core\ReadingTracker.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

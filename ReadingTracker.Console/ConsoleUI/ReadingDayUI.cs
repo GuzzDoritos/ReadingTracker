@@ -2,7 +2,7 @@
 using ReadingTracker.Core.Services;
 using Spectre.Console;
 
-namespace ReadingTracker.Core.ConsoleUI
+namespace ReadingTracker.Console.ConsoleUI
 {
     internal class ReadingDayUI
     {
