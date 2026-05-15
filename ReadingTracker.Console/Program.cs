@@ -8,7 +8,7 @@ Console.OutputEncoding = System.Text.Encoding.UTF8;
 JsonRepository repo = new();
 
 string? error = repo.Load();
-if (error != null) AnsiConsole.Write($"[red]{error}[/]");
+if (error != null) AnsiConsole.MarkupLine($"[red]{error}[/]");
 
 ReadingService tracker = new(repo);
 

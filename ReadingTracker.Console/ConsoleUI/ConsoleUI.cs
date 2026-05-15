@@ -1,5 +1,4 @@
-﻿using ReadingTracker.Core.ConsoleUI;
-using ReadingTracker.Core.Services;
+﻿using ReadingTracker.Core.Services;
 using Spectre.Console;
 
 namespace ReadingTracker.Console.ConsoleUI
