@@ -10,5 +10,7 @@ namespace ReadingTracker.Repositories
         List<TrackedDay> GetDays();
         void AddDay(TrackedDay day);
         void RemoveDay(int dayId);
+
+        int CalculateAlreadyRead(Book book);
     }
 }

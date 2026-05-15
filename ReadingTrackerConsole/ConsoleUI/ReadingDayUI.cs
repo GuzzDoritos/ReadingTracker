@@ -113,7 +113,7 @@ namespace ReadingTracker.ConsoleUI
                     book?.Name ?? "--deleted--",
                     day.CharsRead.ToString(),
                     day.MinutesRead.ToString(),
-                    (book != null ? book.CalculatePercentRead(CalculateAlreadyRead(repo, book)).ToString("F2") + "%" : "N/A")
+                    (book != null ? book.CalculatePercentRead(repo.CalculateAlreadyRead(book)).ToString("F2") + "%" : "N/A")
                     );
             }
 
@@ -130,11 +130,6 @@ namespace ReadingTracker.ConsoleUI
         }
 
 
-        static int CalculateAlreadyRead(IReadingRepository repo, Book book)
-        {
-            return repo.GetDays()
-                .Where(d => d.BookId == book.BookID)
-                .Sum(d => d.CharsRead);
-        }
+
     }
 }

@@ -112,5 +112,11 @@ namespace ReadingTracker.Repositories
             }
         }
 
+        public int CalculateAlreadyRead(Book book)
+        {
+            return GetDays()
+                .Where(d => d.BookId == book.BookID)
+                .Sum(d => d.CharsRead);
+        }
     }
 }
