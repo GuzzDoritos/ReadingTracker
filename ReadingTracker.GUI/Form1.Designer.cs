@@ -35,8 +35,10 @@
             tabPage1 = new TabPage();
             tabPage2 = new TabPage();
             button1 = new Button();
+            daysLst = new ListBox();
             tabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
+            tabPage2.SuspendLayout();
             SuspendLayout();
             // 
             // lstBooks
@@ -77,6 +79,7 @@
             // 
             // tabPage2
             // 
+            tabPage2.Controls.Add(daysLst);
             tabPage2.Location = new Point(4, 24);
             tabPage2.Name = "tabPage2";
             tabPage2.Padding = new Padding(3);
@@ -95,6 +98,15 @@
             button1.UseVisualStyleBackColor = true;
             button1.Click += button1_Click;
             // 
+            // daysLst
+            // 
+            daysLst.FormattingEnabled = true;
+            daysLst.Location = new Point(10, 14);
+            daysLst.Name = "daysLst";
+            daysLst.Size = new Size(315, 349);
+            daysLst.TabIndex = 0;
+            daysLst.SelectedIndexChanged += daysLst_SelectedIndexChanged;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -102,11 +114,12 @@
             ClientSize = new Size(363, 479);
             Controls.Add(button1);
             Controls.Add(tabControl1);
-            Name = "Reading Tracker";
+            Name = "Form1";
             Text = "Reading Tracker";
             Load += Form1_Load_1;
             tabControl1.ResumeLayout(false);
             tabPage1.ResumeLayout(false);
+            tabPage2.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -118,5 +131,6 @@
         private TabPage tabPage2;
         private ListBox lstBooks;
         private Button button1;
+        private ListBox daysLst;
     }
 }
