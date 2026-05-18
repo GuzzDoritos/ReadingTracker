@@ -19,7 +19,7 @@ namespace ReadingTracker.GUI
             repo.Load();
             ReadingService readingService = new(repo);
 
-            Application.Run(new Form1(readingService));
+            Application.Run(new MainWindow(readingService));
         }
     }
 }
