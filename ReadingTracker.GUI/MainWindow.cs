@@ -19,13 +19,6 @@ namespace ReadingTracker.GUI
         {
             InitializeComponent();
             _service = readingService;
-            List<Book> books = _service.GetBooks();
-            bookBindingSource.DataSource = books;
-        }
-
-        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-
         }
 
         private void toolStripButton1_Click(object sender, EventArgs e)
@@ -46,8 +39,25 @@ namespace ReadingTracker.GUI
 
         private void RefreshGrid()
         {
-            dgvBooks.DataSource = null; // Clear the old cache
-            dgvBooks.DataSource = _service.GetBooks(); // Load the fresh list
+            bookBindingSource.DataSource = null; // Clear the old cache
+            bookBindingSource.DataSource = _service.GetBooks(); // Load the fresh list
+        }
+
+        private void dgvBooks_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+            lblSelectedBook.Text = dgvBooks.Rows[index: e.RowIndex].Cells["nameDataGridViewTextBoxColumn"].Value?.ToString() ?? "what";
+            if (!int.TryParse(dgvBooks.Rows[e.RowIndex].Cells["bookIDDataGridViewTextBoxColumn"].Value?.ToString(), out int bookId))
+                return;
+            dgvMiniDays.Visible = true;
+            miniDaysBindingSource.DataSource = _service.GetDaysFromBookId(bookId);
+        }
+
+        private void MainWindow_Load(object sender, EventArgs e)
+        {
+            bookBindingSource.DataSource = _service.GetBooks();
+            dgvMiniDays.Visible = false;
+
         }
     }
 }

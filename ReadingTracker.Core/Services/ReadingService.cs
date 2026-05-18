@@ -37,6 +37,11 @@ namespace ReadingTracker.Core.Services
             return _readingRepository.GetDays();
         }
 
+        public List<TrackedDay> GetDaysFromBookId(int bookId)
+        {
+            return _readingRepository.GetDays().FindAll(d => d.BookId == bookId);
+        }
+
         public string? ValidateCharsRead(Book book, int chars)
         {
             if (chars <= 0)

@@ -20,25 +20,21 @@ namespace ReadingTracker.GUI
 
         private void saveBookBtn_Click(object sender, EventArgs e)
         {
+
+            if (String.IsNullOrEmpty(txtName.Text) || String.IsNullOrEmpty(txtAuthor.Text))
+            {
+                MessageBox.Show("Os campos não podem estar vazios.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             string name = txtName.Text;
             string author = txtAuthor.Text;
-            int totalChars;
-            try
-            {
-                totalChars = int.Parse(txtTotalChars.Text);
-            }
-            catch (FormatException)
-            {
 
-                MessageBox.Show($"Valor total de caracteres não é um número.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            } catch (ArgumentNullException)
+            if (!int.TryParse(txtTotalChars.Text, out int totalChars))
             {
-                MessageBox.Show($"Valor total de caracteres está vazio.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Número com valor vazio ou inválido.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            
-
 
             Genre selectedGenre = (Genre)comboBoxGenre.SelectedItem;
 

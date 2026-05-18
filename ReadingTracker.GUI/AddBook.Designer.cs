@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            components = new System.ComponentModel.Container();
             txtName = new TextBox();
             saveBookBtn = new Button();
             lblBookName = new Label();
@@ -38,10 +37,6 @@
             lblTotalChars = new Label();
             lblGenre = new Label();
             comboBoxGenre = new ComboBox();
-            bookBindingSource = new BindingSource(components);
-            bookBindingSource1 = new BindingSource(components);
-            ((System.ComponentModel.ISupportInitialize)bookBindingSource).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)bookBindingSource1).BeginInit();
             SuspendLayout();
             // 
             // txtName
@@ -120,14 +115,6 @@
             comboBoxGenre.Size = new Size(100, 23);
             comboBoxGenre.TabIndex = 3;
             // 
-            // bookBindingSource
-            // 
-            bookBindingSource.DataSource = typeof(Core.Data.Book);
-            // 
-            // bookBindingSource1
-            // 
-            bookBindingSource1.DataSource = typeof(Core.Data.Book);
-            // 
             // AddBook
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -146,8 +133,6 @@
             StartPosition = FormStartPosition.CenterParent;
             Text = "Adicionar Livro";
             Load += AddBook_Load;
-            ((System.ComponentModel.ISupportInitialize)bookBindingSource).EndInit();
-            ((System.ComponentModel.ISupportInitialize)bookBindingSource1).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -163,7 +148,5 @@
         private Label lblTotalChars;
         private Label lblGenre;
         private ComboBox comboBoxGenre;
-        private BindingSource bookBindingSource1;
-        private BindingSource bookBindingSource;
     }
 }
