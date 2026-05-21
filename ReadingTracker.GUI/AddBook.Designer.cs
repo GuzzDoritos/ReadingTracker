@@ -51,7 +51,7 @@
             saveBookBtn.Location = new Point(103, 161);
             saveBookBtn.Name = "saveBookBtn";
             saveBookBtn.Size = new Size(75, 23);
-            saveBookBtn.TabIndex = 1;
+            saveBookBtn.TabIndex = 4;
             saveBookBtn.Text = "OK";
             saveBookBtn.UseVisualStyleBackColor = true;
             saveBookBtn.Click += saveBookBtn_Click;
@@ -70,7 +70,7 @@
             txtAuthor.Location = new Point(140, 60);
             txtAuthor.Name = "txtAuthor";
             txtAuthor.Size = new Size(100, 23);
-            txtAuthor.TabIndex = 0;
+            txtAuthor.TabIndex = 1;
             // 
             // lblAuthorName
             // 
@@ -86,7 +86,7 @@
             txtTotalChars.Location = new Point(140, 89);
             txtTotalChars.Name = "txtTotalChars";
             txtTotalChars.Size = new Size(100, 23);
-            txtTotalChars.TabIndex = 0;
+            txtTotalChars.TabIndex = 2;
             // 
             // lblTotalChars
             // 
@@ -120,15 +120,15 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(288, 217);
-            Controls.Add(comboBoxGenre);
             Controls.Add(lblGenre);
             Controls.Add(lblTotalChars);
             Controls.Add(lblAuthorName);
             Controls.Add(lblBookName);
-            Controls.Add(saveBookBtn);
-            Controls.Add(txtTotalChars);
-            Controls.Add(txtAuthor);
             Controls.Add(txtName);
+            Controls.Add(txtAuthor);
+            Controls.Add(txtTotalChars);
+            Controls.Add(comboBoxGenre);
+            Controls.Add(saveBookBtn);
             Name = "AddBook";
             StartPosition = FormStartPosition.CenterParent;
             Text = "Adicionar Livro";
