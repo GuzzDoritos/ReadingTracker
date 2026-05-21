@@ -1,11 +1,12 @@
-﻿using ReadingTracker.Core.Repositories;
+﻿using ReadingTracker.Core.Data;
+using ReadingTracker.Core.Repositories;
 using ReadingTracker.Core.Services;
-using ReadingTracker.Core.Data;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Net;
 using System.Text;
 using System.Windows.Forms;
 
@@ -15,10 +16,12 @@ namespace ReadingTracker.GUI
 
     {
         private ReadingService _service;
+        private int _selectedBookId;
         public MainWindow(ReadingService readingService)
         {
             InitializeComponent();
             _service = readingService;
+            _selectedBookId = -1;
         }
 
         private void toolStripButton1_Click(object sender, EventArgs e)
@@ -46,10 +49,17 @@ namespace ReadingTracker.GUI
         private void dgvBooks_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             if (e.RowIndex < 0) return;
+
             lblSelectedBook.Text = dgvBooks.Rows[index: e.RowIndex].Cells["nameDataGridViewTextBoxColumn"].Value?.ToString() ?? "what";
+
             if (!int.TryParse(dgvBooks.Rows[e.RowIndex].Cells["bookIDDataGridViewTextBoxColumn"].Value?.ToString(), out int bookId))
                 return;
+
+            btnDeleteBook.Visible = true;
             dgvMiniDays.Visible = true;
+
+            _selectedBookId = bookId;
+
             miniDaysBindingSource.DataSource = _service.GetDaysFromBookId(bookId);
         }
 
@@ -57,6 +67,37 @@ namespace ReadingTracker.GUI
         {
             bookBindingSource.DataSource = _service.GetBooks();
             dgvMiniDays.Visible = false;
+            btnDeleteBook.Visible = false;
+
+        }
+
+        private void btnDeleteBook_Click(object sender, EventArgs e)
+        {
+            if (_selectedBookId != -1)
+            {
+                var confirmResult = MessageBox.Show("Certeza que deseja deletar este livro?",
+                                     "Confirmar deletação",
+                                     MessageBoxButtons.YesNo);
+                if (confirmResult == DialogResult.Yes)
+                {
+                    _service.RemoveBook(_selectedBookId);
+                    lblSelectedBook.Text = "Nenhum livro selecionado.";
+
+
+                    _selectedBookId = -1;
+
+                    btnDeleteBook.Visible = false;
+                    dgvMiniDays.Visible = false;
+                    RefreshGrid();
+                }
+                else
+                {
+                    return;
+                }
+
+
+            }
+                
 
         }
     }

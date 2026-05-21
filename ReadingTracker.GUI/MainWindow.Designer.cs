@@ -29,11 +29,20 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
             DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
             bookBindingSource = new BindingSource(components);
-            tabControl1 = new TabControl();
-            tabPage1 = new TabPage();
+            tabMainTabs = new TabControl();
+            Livros = new TabPage();
+            gboxBookInfo = new GroupBox();
+            lblNome = new Label();
+            lblSelectedBook = new Label();
+            gboxDias = new GroupBox();
+            dgvMiniDays = new DataGridView();
+            Date = new DataGridViewTextBoxColumn();
+            CharsLido = new DataGridViewTextBoxColumn();
+            Minutos = new DataGridViewTextBoxColumn();
+            miniDaysBindingSource = new BindingSource(components);
             dgvBooks = new DataGridView();
             bookIDDataGridViewTextBoxColumn = new DataGridViewTextBoxColumn();
             nameDataGridViewTextBoxColumn = new DataGridViewTextBoxColumn();
@@ -41,154 +50,87 @@
             bookGenreDataGridViewTextBoxColumn = new DataGridViewTextBoxColumn();
             totalCharsDataGridViewTextBoxColumn = new DataGridViewTextBoxColumn();
             isCompletedDataGridViewCheckBoxColumn = new DataGridViewCheckBoxColumn();
-            tabPage2 = new TabPage();
+            btnDeleteBook = new Button();
+            Dias = new TabPage();
             toolStrip1 = new ToolStrip();
             toolStripButton1 = new ToolStripButton();
             statusStrip1 = new StatusStrip();
-            lblSelectedBook = new Label();
-            dgvMiniDays = new DataGridView();
-            Date = new DataGridViewTextBoxColumn();
-            CharsLido = new DataGridViewTextBoxColumn();
-            Minutos = new DataGridViewTextBoxColumn();
-            miniDaysBindingSource = new BindingSource(components);
             ((System.ComponentModel.ISupportInitialize)bookBindingSource).BeginInit();
-            tabControl1.SuspendLayout();
-            tabPage1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)dgvBooks).BeginInit();
-            toolStrip1.SuspendLayout();
+            tabMainTabs.SuspendLayout();
+            Livros.SuspendLayout();
+            gboxBookInfo.SuspendLayout();
+            gboxDias.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvMiniDays).BeginInit();
             ((System.ComponentModel.ISupportInitialize)miniDaysBindingSource).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dgvBooks).BeginInit();
+            toolStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // bookBindingSource
             // 
             bookBindingSource.DataSource = typeof(Core.Data.Book);
             // 
-            // tabControl1
+            // tabMainTabs
             // 
-            tabControl1.Controls.Add(tabPage1);
-            tabControl1.Controls.Add(tabPage2);
-            tabControl1.Location = new Point(12, 27);
-            tabControl1.Name = "tabControl1";
-            tabControl1.SelectedIndex = 0;
-            tabControl1.Size = new Size(731, 542);
-            tabControl1.TabIndex = 1;
+            tabMainTabs.Controls.Add(Livros);
+            tabMainTabs.Controls.Add(Dias);
+            tabMainTabs.Location = new Point(12, 27);
+            tabMainTabs.Name = "tabMainTabs";
+            tabMainTabs.SelectedIndex = 0;
+            tabMainTabs.Size = new Size(955, 542);
+            tabMainTabs.TabIndex = 1;
             // 
-            // tabPage1
+            // Livros
             // 
-            tabPage1.Controls.Add(dgvBooks);
-            tabPage1.Location = new Point(4, 24);
-            tabPage1.Name = "tabPage1";
-            tabPage1.Padding = new Padding(3);
-            tabPage1.Size = new Size(723, 514);
-            tabPage1.TabIndex = 0;
-            tabPage1.Text = "tabPage1";
-            tabPage1.UseVisualStyleBackColor = true;
+            Livros.Controls.Add(gboxBookInfo);
+            Livros.Controls.Add(gboxDias);
+            Livros.Controls.Add(dgvBooks);
+            Livros.Controls.Add(btnDeleteBook);
+            Livros.Location = new Point(4, 24);
+            Livros.Name = "Livros";
+            Livros.Padding = new Padding(3);
+            Livros.Size = new Size(947, 514);
+            Livros.TabIndex = 0;
+            Livros.Text = "Livros";
+            Livros.UseVisualStyleBackColor = true;
             // 
-            // dgvBooks
+            // gboxBookInfo
             // 
-            dgvBooks.AllowUserToAddRows = false;
-            dgvBooks.AllowUserToDeleteRows = false;
-            dgvBooks.AutoGenerateColumns = false;
-            dgvBooks.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvBooks.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvBooks.Columns.AddRange(new DataGridViewColumn[] { bookIDDataGridViewTextBoxColumn, nameDataGridViewTextBoxColumn, authorDataGridViewTextBoxColumn, bookGenreDataGridViewTextBoxColumn, totalCharsDataGridViewTextBoxColumn, isCompletedDataGridViewCheckBoxColumn });
-            dgvBooks.DataSource = bookBindingSource;
-            dgvBooks.Dock = DockStyle.Fill;
-            dgvBooks.Location = new Point(3, 3);
-            dgvBooks.Name = "dgvBooks";
-            dgvBooks.ReadOnly = true;
-            dgvBooks.Size = new Size(717, 508);
-            dgvBooks.TabIndex = 0;
-            dgvBooks.CellMouseClick += dgvBooks_CellMouseClick;
+            gboxBookInfo.Controls.Add(lblNome);
+            gboxBookInfo.Controls.Add(lblSelectedBook);
+            gboxBookInfo.Location = new Point(724, 6);
+            gboxBookInfo.Name = "gboxBookInfo";
+            gboxBookInfo.Size = new Size(217, 143);
+            gboxBookInfo.TabIndex = 9;
+            gboxBookInfo.TabStop = false;
+            gboxBookInfo.Text = "Informações do Livro";
             // 
-            // bookIDDataGridViewTextBoxColumn
+            // lblNome
             // 
-            bookIDDataGridViewTextBoxColumn.DataPropertyName = "BookID";
-            bookIDDataGridViewTextBoxColumn.HeaderText = "BookID";
-            bookIDDataGridViewTextBoxColumn.Name = "bookIDDataGridViewTextBoxColumn";
-            bookIDDataGridViewTextBoxColumn.ReadOnly = true;
-            // 
-            // nameDataGridViewTextBoxColumn
-            // 
-            nameDataGridViewTextBoxColumn.DataPropertyName = "Name";
-            nameDataGridViewTextBoxColumn.HeaderText = "Name";
-            nameDataGridViewTextBoxColumn.Name = "nameDataGridViewTextBoxColumn";
-            nameDataGridViewTextBoxColumn.ReadOnly = true;
-            // 
-            // authorDataGridViewTextBoxColumn
-            // 
-            authorDataGridViewTextBoxColumn.DataPropertyName = "Author";
-            authorDataGridViewTextBoxColumn.HeaderText = "Author";
-            authorDataGridViewTextBoxColumn.Name = "authorDataGridViewTextBoxColumn";
-            authorDataGridViewTextBoxColumn.ReadOnly = true;
-            // 
-            // bookGenreDataGridViewTextBoxColumn
-            // 
-            bookGenreDataGridViewTextBoxColumn.DataPropertyName = "BookGenre";
-            bookGenreDataGridViewTextBoxColumn.HeaderText = "BookGenre";
-            bookGenreDataGridViewTextBoxColumn.Name = "bookGenreDataGridViewTextBoxColumn";
-            bookGenreDataGridViewTextBoxColumn.ReadOnly = true;
-            // 
-            // totalCharsDataGridViewTextBoxColumn
-            // 
-            totalCharsDataGridViewTextBoxColumn.DataPropertyName = "TotalChars";
-            totalCharsDataGridViewTextBoxColumn.HeaderText = "TotalChars";
-            totalCharsDataGridViewTextBoxColumn.Name = "totalCharsDataGridViewTextBoxColumn";
-            totalCharsDataGridViewTextBoxColumn.ReadOnly = true;
-            // 
-            // isCompletedDataGridViewCheckBoxColumn
-            // 
-            isCompletedDataGridViewCheckBoxColumn.DataPropertyName = "IsCompleted";
-            isCompletedDataGridViewCheckBoxColumn.HeaderText = "IsCompleted";
-            isCompletedDataGridViewCheckBoxColumn.Name = "isCompletedDataGridViewCheckBoxColumn";
-            isCompletedDataGridViewCheckBoxColumn.ReadOnly = true;
-            // 
-            // tabPage2
-            // 
-            tabPage2.Location = new Point(4, 24);
-            tabPage2.Name = "tabPage2";
-            tabPage2.Padding = new Padding(3);
-            tabPage2.Size = new Size(723, 514);
-            tabPage2.TabIndex = 1;
-            tabPage2.Text = "tabPage2";
-            tabPage2.UseVisualStyleBackColor = true;
-            // 
-            // toolStrip1
-            // 
-            toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripButton1 });
-            toolStrip1.Location = new Point(0, 0);
-            toolStrip1.Name = "toolStrip1";
-            toolStrip1.Size = new Size(979, 25);
-            toolStrip1.TabIndex = 2;
-            toolStrip1.Text = "toolStrip1";
-            // 
-            // toolStripButton1
-            // 
-            toolStripButton1.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            toolStripButton1.Image = (Image)resources.GetObject("toolStripButton1.Image");
-            toolStripButton1.ImageTransparentColor = Color.Magenta;
-            toolStripButton1.Name = "toolStripButton1";
-            toolStripButton1.Size = new Size(23, 22);
-            toolStripButton1.Text = "toolStripButton1";
-            toolStripButton1.Click += toolStripButton1_Click;
-            // 
-            // statusStrip1
-            // 
-            statusStrip1.Location = new Point(0, 585);
-            statusStrip1.Name = "statusStrip1";
-            statusStrip1.Size = new Size(979, 22);
-            statusStrip1.TabIndex = 3;
-            statusStrip1.Text = "statusStrip1";
+            lblNome.AutoSize = true;
+            lblNome.Location = new Point(6, 19);
+            lblNome.Name = "lblNome";
+            lblNome.Size = new Size(43, 15);
+            lblNome.TabIndex = 8;
+            lblNome.Text = "Nome:";
             // 
             // lblSelectedBook
             // 
-            lblSelectedBook.Location = new Point(742, 96);
+            lblSelectedBook.Location = new Point(55, 19);
             lblSelectedBook.Name = "lblSelectedBook";
-            lblSelectedBook.Size = new Size(237, 22);
+            lblSelectedBook.Size = new Size(156, 53);
             lblSelectedBook.TabIndex = 4;
             lblSelectedBook.Text = "Nenhum livro selecionado";
-            lblSelectedBook.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // gboxDias
+            // 
+            gboxDias.Controls.Add(dgvMiniDays);
+            gboxDias.Location = new Point(724, 155);
+            gboxDias.Name = "gboxDias";
+            gboxDias.Size = new Size(217, 182);
+            gboxDias.TabIndex = 7;
+            gboxDias.TabStop = false;
+            gboxDias.Text = "Dias";
             // 
             // dgvMiniDays
             // 
@@ -207,7 +149,7 @@
             dgvMiniDays.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvMiniDays.Columns.AddRange(new DataGridViewColumn[] { Date, CharsLido, Minutos });
             dgvMiniDays.DataSource = miniDaysBindingSource;
-            dgvMiniDays.Location = new Point(759, 366);
+            dgvMiniDays.Location = new Point(6, 22);
             dgvMiniDays.Name = "dgvMiniDays";
             dgvMiniDays.ReadOnly = true;
             dgvMiniDays.RowHeadersVisible = false;
@@ -237,16 +179,128 @@
             Minutos.Name = "Minutos";
             Minutos.ReadOnly = true;
             // 
+            // dgvBooks
+            // 
+            dgvBooks.AllowUserToAddRows = false;
+            dgvBooks.AllowUserToDeleteRows = false;
+            dgvBooks.AutoGenerateColumns = false;
+            dgvBooks.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvBooks.Columns.AddRange(new DataGridViewColumn[] { bookIDDataGridViewTextBoxColumn, nameDataGridViewTextBoxColumn, authorDataGridViewTextBoxColumn, bookGenreDataGridViewTextBoxColumn, totalCharsDataGridViewTextBoxColumn, isCompletedDataGridViewCheckBoxColumn });
+            dgvBooks.DataSource = bookBindingSource;
+            dgvBooks.Dock = DockStyle.Left;
+            dgvBooks.Location = new Point(3, 3);
+            dgvBooks.Name = "dgvBooks";
+            dgvBooks.ReadOnly = true;
+            dgvBooks.RowHeadersVisible = false;
+            dgvBooks.ScrollBars = ScrollBars.None;
+            dgvBooks.Size = new Size(715, 508);
+            dgvBooks.TabIndex = 0;
+            dgvBooks.CellMouseClick += dgvBooks_CellMouseClick;
+            // 
+            // bookIDDataGridViewTextBoxColumn
+            // 
+            bookIDDataGridViewTextBoxColumn.DataPropertyName = "BookID";
+            bookIDDataGridViewTextBoxColumn.HeaderText = "ID";
+            bookIDDataGridViewTextBoxColumn.Name = "bookIDDataGridViewTextBoxColumn";
+            bookIDDataGridViewTextBoxColumn.ReadOnly = true;
+            bookIDDataGridViewTextBoxColumn.Resizable = DataGridViewTriState.False;
+            bookIDDataGridViewTextBoxColumn.Width = 50;
+            // 
+            // nameDataGridViewTextBoxColumn
+            // 
+            nameDataGridViewTextBoxColumn.DataPropertyName = "Name";
+            nameDataGridViewTextBoxColumn.HeaderText = "Título";
+            nameDataGridViewTextBoxColumn.Name = "nameDataGridViewTextBoxColumn";
+            nameDataGridViewTextBoxColumn.ReadOnly = true;
+            nameDataGridViewTextBoxColumn.Width = 240;
+            // 
+            // authorDataGridViewTextBoxColumn
+            // 
+            authorDataGridViewTextBoxColumn.DataPropertyName = "Author";
+            authorDataGridViewTextBoxColumn.HeaderText = "Autor";
+            authorDataGridViewTextBoxColumn.Name = "authorDataGridViewTextBoxColumn";
+            authorDataGridViewTextBoxColumn.ReadOnly = true;
+            authorDataGridViewTextBoxColumn.Width = 106;
+            // 
+            // bookGenreDataGridViewTextBoxColumn
+            // 
+            bookGenreDataGridViewTextBoxColumn.DataPropertyName = "BookGenre";
+            bookGenreDataGridViewTextBoxColumn.HeaderText = "Gênero";
+            bookGenreDataGridViewTextBoxColumn.Name = "bookGenreDataGridViewTextBoxColumn";
+            bookGenreDataGridViewTextBoxColumn.ReadOnly = true;
+            bookGenreDataGridViewTextBoxColumn.Width = 105;
+            // 
+            // totalCharsDataGridViewTextBoxColumn
+            // 
+            totalCharsDataGridViewTextBoxColumn.DataPropertyName = "TotalChars";
+            totalCharsDataGridViewTextBoxColumn.HeaderText = "Caracteres";
+            totalCharsDataGridViewTextBoxColumn.Name = "totalCharsDataGridViewTextBoxColumn";
+            totalCharsDataGridViewTextBoxColumn.ReadOnly = true;
+            totalCharsDataGridViewTextBoxColumn.Width = 106;
+            // 
+            // isCompletedDataGridViewCheckBoxColumn
+            // 
+            isCompletedDataGridViewCheckBoxColumn.DataPropertyName = "IsCompleted";
+            isCompletedDataGridViewCheckBoxColumn.HeaderText = "Finalizado";
+            isCompletedDataGridViewCheckBoxColumn.Name = "isCompletedDataGridViewCheckBoxColumn";
+            isCompletedDataGridViewCheckBoxColumn.ReadOnly = true;
+            isCompletedDataGridViewCheckBoxColumn.Width = 106;
+            // 
+            // btnDeleteBook
+            // 
+            btnDeleteBook.Location = new Point(730, 343);
+            btnDeleteBook.Name = "btnDeleteBook";
+            btnDeleteBook.Size = new Size(205, 23);
+            btnDeleteBook.TabIndex = 6;
+            btnDeleteBook.Text = "Deletar";
+            btnDeleteBook.UseVisualStyleBackColor = true;
+            btnDeleteBook.Click += btnDeleteBook_Click;
+            // 
+            // Dias
+            // 
+            Dias.Location = new Point(4, 24);
+            Dias.Name = "Dias";
+            Dias.Padding = new Padding(3);
+            Dias.Size = new Size(947, 514);
+            Dias.TabIndex = 1;
+            Dias.Text = "Dias";
+            Dias.UseVisualStyleBackColor = true;
+            // 
+            // toolStrip1
+            // 
+            toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripButton1 });
+            toolStrip1.Location = new Point(0, 0);
+            toolStrip1.Name = "toolStrip1";
+            toolStrip1.Size = new Size(979, 25);
+            toolStrip1.TabIndex = 2;
+            toolStrip1.Text = "toolStrip1";
+            // 
+            // toolStripButton1
+            // 
+            toolStripButton1.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            toolStripButton1.Image = (Image)resources.GetObject("toolStripButton1.Image");
+            toolStripButton1.ImageTransparentColor = Color.Magenta;
+            toolStripButton1.Name = "toolStripButton1";
+            toolStripButton1.Size = new Size(23, 22);
+            toolStripButton1.Text = "toolStripButton1";
+            toolStripButton1.Click += toolStripButton1_Click;
+            // 
+            // statusStrip1
+            // 
+            statusStrip1.Location = new Point(0, 585);
+            statusStrip1.Name = "statusStrip1";
+            statusStrip1.Size = new Size(979, 22);
+            statusStrip1.TabIndex = 3;
+            statusStrip1.Text = "statusStrip1";
+            // 
             // MainWindow
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(979, 607);
-            Controls.Add(dgvMiniDays);
-            Controls.Add(lblSelectedBook);
             Controls.Add(statusStrip1);
             Controls.Add(toolStrip1);
-            Controls.Add(tabControl1);
+            Controls.Add(tabMainTabs);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             Name = "MainWindow";
@@ -254,31 +308,28 @@
             Text = "Names";
             Load += MainWindow_Load;
             ((System.ComponentModel.ISupportInitialize)bookBindingSource).EndInit();
-            tabControl1.ResumeLayout(false);
-            tabPage1.ResumeLayout(false);
+            tabMainTabs.ResumeLayout(false);
+            Livros.ResumeLayout(false);
+            gboxBookInfo.ResumeLayout(false);
+            gboxBookInfo.PerformLayout();
+            gboxDias.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dgvMiniDays).EndInit();
+            ((System.ComponentModel.ISupportInitialize)miniDaysBindingSource).EndInit();
             ((System.ComponentModel.ISupportInitialize)dgvBooks).EndInit();
             toolStrip1.ResumeLayout(false);
             toolStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)dgvMiniDays).EndInit();
-            ((System.ComponentModel.ISupportInitialize)miniDaysBindingSource).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
 
         #endregion
-        private TabControl tabControl1;
-        private TabPage tabPage1;
-        private TabPage tabPage2;
+        private TabControl tabMainTabs;
+        private TabPage Livros;
+        private TabPage Dias;
         private ToolStrip toolStrip1;
         private StatusStrip statusStrip1;
         private BindingSource bookBindingSource;
         private DataGridView dgvBooks;
-        private DataGridViewTextBoxColumn bookIDDataGridViewTextBoxColumn;
-        private DataGridViewTextBoxColumn nameDataGridViewTextBoxColumn;
-        private DataGridViewTextBoxColumn authorDataGridViewTextBoxColumn;
-        private DataGridViewTextBoxColumn bookGenreDataGridViewTextBoxColumn;
-        private DataGridViewTextBoxColumn totalCharsDataGridViewTextBoxColumn;
-        private DataGridViewCheckBoxColumn isCompletedDataGridViewCheckBoxColumn;
         private ToolStripButton toolStripButton1;
         private Label lblSelectedBook;
         private DataGridView dgvMiniDays;
@@ -286,5 +337,15 @@
         private DataGridViewTextBoxColumn Date;
         private DataGridViewTextBoxColumn CharsLido;
         private DataGridViewTextBoxColumn Minutos;
+        private Button btnDeleteBook;
+        private GroupBox gboxDias;
+        private Label lblNome;
+        private GroupBox gboxBookInfo;
+        private DataGridViewTextBoxColumn bookIDDataGridViewTextBoxColumn;
+        private DataGridViewTextBoxColumn nameDataGridViewTextBoxColumn;
+        private DataGridViewTextBoxColumn authorDataGridViewTextBoxColumn;
+        private DataGridViewTextBoxColumn bookGenreDataGridViewTextBoxColumn;
+        private DataGridViewTextBoxColumn totalCharsDataGridViewTextBoxColumn;
+        private DataGridViewCheckBoxColumn isCompletedDataGridViewCheckBoxColumn;
     }
 }
