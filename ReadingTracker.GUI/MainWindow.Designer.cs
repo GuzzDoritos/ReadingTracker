@@ -52,6 +52,8 @@
             isCompletedDataGridViewCheckBoxColumn = new DataGridViewCheckBoxColumn();
             btnDeleteBook = new Button();
             Dias = new TabPage();
+            label1 = new Label();
+            dateTimePicker1 = new DateTimePicker();
             toolStrip1 = new ToolStrip();
             toolStripButton1 = new ToolStripButton();
             statusStrip1 = new StatusStrip();
@@ -63,6 +65,7 @@
             ((System.ComponentModel.ISupportInitialize)dgvMiniDays).BeginInit();
             ((System.ComponentModel.ISupportInitialize)miniDaysBindingSource).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dgvBooks).BeginInit();
+            Dias.SuspendLayout();
             toolStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -258,6 +261,8 @@
             // 
             // Dias
             // 
+            Dias.Controls.Add(label1);
+            Dias.Controls.Add(dateTimePicker1);
             Dias.Location = new Point(4, 24);
             Dias.Name = "Dias";
             Dias.Padding = new Padding(3);
@@ -265,6 +270,28 @@
             Dias.TabIndex = 1;
             Dias.Text = "Dias";
             Dias.UseVisualStyleBackColor = true;
+            // 
+            // label1
+            // 
+            label1.AllowDrop = true;
+            label1.AutoSize = true;
+            label1.Font = new Font("MS Mincho", 36F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            label1.Location = new Point(398, 259);
+            label1.Name = "label1";
+            label1.Size = new Size(164, 48);
+            label1.TabIndex = 1;
+            label1.Text = "label1";
+            label1.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // dateTimePicker1
+            // 
+            dateTimePicker1.CustomFormat = "";
+            dateTimePicker1.Format = DateTimePickerFormat.Short;
+            dateTimePicker1.Location = new Point(420, 6);
+            dateTimePicker1.Name = "dateTimePicker1";
+            dateTimePicker1.Size = new Size(100, 23);
+            dateTimePicker1.TabIndex = 0;
+            dateTimePicker1.ValueChanged += dateTimePicker1_ValueChanged;
             // 
             // toolStrip1
             // 
@@ -316,6 +343,8 @@
             ((System.ComponentModel.ISupportInitialize)dgvMiniDays).EndInit();
             ((System.ComponentModel.ISupportInitialize)miniDaysBindingSource).EndInit();
             ((System.ComponentModel.ISupportInitialize)dgvBooks).EndInit();
+            Dias.ResumeLayout(false);
+            Dias.PerformLayout();
             toolStrip1.ResumeLayout(false);
             toolStrip1.PerformLayout();
             ResumeLayout(false);
@@ -347,5 +376,7 @@
         private DataGridViewTextBoxColumn bookGenreDataGridViewTextBoxColumn;
         private DataGridViewTextBoxColumn totalCharsDataGridViewTextBoxColumn;
         private DataGridViewCheckBoxColumn isCompletedDataGridViewCheckBoxColumn;
+        private Label label1;
+        private DateTimePicker dateTimePicker1;
     }
 }
