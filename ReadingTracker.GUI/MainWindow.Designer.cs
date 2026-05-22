@@ -52,11 +52,13 @@
             isCompletedDataGridViewCheckBoxColumn = new DataGridViewCheckBoxColumn();
             btnDeleteBook = new Button();
             Dias = new TabPage();
-            label1 = new Label();
-            dateTimePicker1 = new DateTimePicker();
+            dgvTrackedDays = new DataGridView();
+            dateDayFilter = new DateTimePicker();
             toolStrip1 = new ToolStrip();
             toolStripButton1 = new ToolStripButton();
             statusStrip1 = new StatusStrip();
+            groupedDaysBindingSource = new BindingSource(components);
+            TrackedDate = new DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)bookBindingSource).BeginInit();
             tabMainTabs.SuspendLayout();
             Livros.SuspendLayout();
@@ -66,7 +68,9 @@
             ((System.ComponentModel.ISupportInitialize)miniDaysBindingSource).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dgvBooks).BeginInit();
             Dias.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvTrackedDays).BeginInit();
             toolStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)groupedDaysBindingSource).BeginInit();
             SuspendLayout();
             // 
             // bookBindingSource
@@ -261,8 +265,8 @@
             // 
             // Dias
             // 
-            Dias.Controls.Add(label1);
-            Dias.Controls.Add(dateTimePicker1);
+            Dias.Controls.Add(dgvTrackedDays);
+            Dias.Controls.Add(dateDayFilter);
             Dias.Location = new Point(4, 24);
             Dias.Name = "Dias";
             Dias.Padding = new Padding(3);
@@ -271,27 +275,26 @@
             Dias.Text = "Dias";
             Dias.UseVisualStyleBackColor = true;
             // 
-            // label1
+            // dgvTrackedDays
             // 
-            label1.AllowDrop = true;
-            label1.AutoSize = true;
-            label1.Font = new Font("MS Mincho", 36F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            label1.Location = new Point(398, 259);
-            label1.Name = "label1";
-            label1.Size = new Size(164, 48);
-            label1.TabIndex = 1;
-            label1.Text = "label1";
-            label1.TextAlign = ContentAlignment.MiddleCenter;
+            dgvTrackedDays.AutoGenerateColumns = false;
+            dgvTrackedDays.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvTrackedDays.Columns.AddRange(new DataGridViewColumn[] { TrackedDate });
+            dgvTrackedDays.DataSource = groupedDaysBindingSource;
+            dgvTrackedDays.Location = new Point(6, 44);
+            dgvTrackedDays.Name = "dgvTrackedDays";
+            dgvTrackedDays.Size = new Size(603, 455);
+            dgvTrackedDays.TabIndex = 1;
             // 
-            // dateTimePicker1
+            // dateDayFilter
             // 
-            dateTimePicker1.CustomFormat = "";
-            dateTimePicker1.Format = DateTimePickerFormat.Short;
-            dateTimePicker1.Location = new Point(420, 6);
-            dateTimePicker1.Name = "dateTimePicker1";
-            dateTimePicker1.Size = new Size(100, 23);
-            dateTimePicker1.TabIndex = 0;
-            dateTimePicker1.ValueChanged += dateTimePicker1_ValueChanged;
+            dateDayFilter.CustomFormat = "";
+            dateDayFilter.Format = DateTimePickerFormat.Short;
+            dateDayFilter.Location = new Point(251, 15);
+            dateDayFilter.Name = "dateDayFilter";
+            dateDayFilter.Size = new Size(100, 23);
+            dateDayFilter.TabIndex = 0;
+            dateDayFilter.ValueChanged += dateTimePicker1_ValueChanged;
             // 
             // toolStrip1
             // 
@@ -320,6 +323,13 @@
             statusStrip1.TabIndex = 3;
             statusStrip1.Text = "statusStrip1";
             // 
+            // TrackedDate
+            // 
+            TrackedDate.DataPropertyName = "Date";
+            TrackedDate.HeaderText = "Data";
+            TrackedDate.Name = "TrackedDate";
+            TrackedDate.ReadOnly = true;
+            // 
             // MainWindow
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -344,9 +354,10 @@
             ((System.ComponentModel.ISupportInitialize)miniDaysBindingSource).EndInit();
             ((System.ComponentModel.ISupportInitialize)dgvBooks).EndInit();
             Dias.ResumeLayout(false);
-            Dias.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvTrackedDays).EndInit();
             toolStrip1.ResumeLayout(false);
             toolStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)groupedDaysBindingSource).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -377,6 +388,9 @@
         private DataGridViewTextBoxColumn totalCharsDataGridViewTextBoxColumn;
         private DataGridViewCheckBoxColumn isCompletedDataGridViewCheckBoxColumn;
         private Label label1;
-        private DateTimePicker dateTimePicker1;
+        private DateTimePicker dateDayFilter;
+        private DataGridView dgvTrackedDays;
+        private BindingSource groupedDaysBindingSource;
+        private DataGridViewTextBoxColumn TrackedDate;
     }
 }
