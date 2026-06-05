@@ -6,6 +6,5 @@
   <Project Path="Frontend/Frontend.Server/Frontend.Server.csproj" Id="1da7b02c-13a1-47be-a8b4-b267ff747e5d" />
   <Project Path="ReadingTracker.Console/ReadingTracker.Console.csproj" />
   <Project Path="ReadingTracker.Core/ReadingTracker.Core.csproj" Id="9964929f-4ecf-4cbf-8bc3-8a275eff6ae0" />
-  <Project Path="ReadingTracker.GUI/ReadingTracker.GUI.csproj" Id="60be8ed7-3678-4644-9c33-5a405b712c42" />
   <Project Path="ReadingTracker.Tests/ReadingTracker.Tests.csproj" Id="afc07fa4-ef1f-4268-9076-897c88484374" />
 </Solution>
