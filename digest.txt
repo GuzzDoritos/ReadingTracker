@@ -1,0 +1,2568 @@
+Directory structure:
+└── ReadingTracker/
+    ├── ReadingTracker.slnx
+    ├── ReadingTracker.Console/
+    │   ├── Program.cs
+    │   ├── ReadingTracker.Console.csproj
+    │   ├── ConsoleUI/
+    │   │   ├── BookUI.cs
+    │   │   ├── ConsoleUI.cs
+    │   │   └── ReadingDayUI.cs
+    │   └── Properties/
+    │       └── launchSettings.json
+    ├── ReadingTracker.Core/
+    │   ├── ReadingTracker.Core.csproj
+    │   ├── Data/
+    │   │   ├── Book.cs
+    │   │   ├── Genre.cs
+    │   │   ├── Series.cs
+    │   │   └── TrackedDay.cs
+    │   ├── Repositories/
+    │   │   ├── IReadingRepository.cs
+    │   │   └── JsonRepository.cs
+    │   └── Services/
+    │       └── ReadingService.cs
+    ├── ReadingTracker.GUI/
+    │   ├── AddBook.cs
+    │   ├── AddBook.Designer.cs
+    │   ├── AddBook.resx
+    │   ├── MainWindow.cs
+    │   ├── MainWindow.Designer.cs
+    │   ├── MainWindow.resx
+    │   ├── Program.cs
+    │   ├── ReadingTracker.GUI.csproj
+    │   ├── .resx
+    │   └── Properties/
+    │       └── DataSources/
+    │           └── ReadingTracker.Core.Data.Book.datasource
+    ├── ReadingTracker.Tests/
+    │   ├── BookTests.cs
+    │   ├── InMemoryRepository.cs
+    │   ├── ReadingServiceTests.cs
+    │   └── ReadingTracker.Tests.csproj
+    └── .agents/
+        └── rules/
+            └── tutor-guide.md
+
+================================================
+FILE: ReadingTracker.slnx
+================================================
+<Solution>
+  <Project Path="ReadingTracker.Console/ReadingTracker.Console.csproj" />
+  <Project Path="ReadingTracker.Core/ReadingTracker.Core.csproj" Id="9964929f-4ecf-4cbf-8bc3-8a275eff6ae0" />
+  <Project Path="ReadingTracker.GUI/ReadingTracker.GUI.csproj" Id="60be8ed7-3678-4644-9c33-5a405b712c42" />
+  <Project Path="ReadingTracker.Tests/ReadingTracker.Tests.csproj" Id="afc07fa4-ef1f-4268-9076-897c88484374" />
+</Solution>
+
+
+
+================================================
+FILE: ReadingTracker.Console/Program.cs
+================================================
+ï»¿using ReadingTracker.Console.ConsoleUI;
+using ReadingTracker.Core.Repositories;
+using ReadingTracker.Core.Services;
+using Spectre.Console;
+
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+
+JsonRepository repo = new();
+
+string? error = repo.Load();
+if (error != null) AnsiConsole.MarkupLine($"[red]{error}[/]");
+
+ReadingService tracker = new(repo);
+
+ConsoleUI.Start(tracker);
+
+
+================================================
+FILE: ReadingTracker.Console/ReadingTracker.Console.csproj
+================================================
+ï»¿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Spectre.Console" Version="0.55.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ReadingTracker.Core\ReadingTracker.Core.csproj" />
+  </ItemGroup>
+
+</Project>
+
+
+
+================================================
+FILE: ReadingTracker.Console/ConsoleUI/BookUI.cs
+================================================
+ï»¿using ReadingTracker.Core.Data;
+using ReadingTracker.Core.Services;
+using Spectre.Console;
+
+namespace ReadingTracker.Console.ConsoleUI
+{
+    internal class BookUI
+    {
+        public static void AddBook(ReadingService tracker)
+        {
+            AnsiConsole.Clear();
+            AnsiConsole.WriteLine();
+            string name = AnsiConsole.Ask<string>("Adicione o [green]nome do livro[/]:", "Livro");
+            string author = AnsiConsole.Ask<string>("Informe o [green]nome do autor[/]:", "Autor");
+
+            List<Genre> genres = Enum.GetValues<Genre>().ToList();
+
+            SelectionPrompt<Genre> prompt = new SelectionPrompt<Genre>()
+                                .Title("Selecione um [green]gÃªnero[/]:")
+                                .PageSize(8)
+                                .EnableSearch()
+                                .SearchPlaceholderText("Type to filter...")
+                                .AddChoices(genres);
+
+            Genre genre = AnsiConsole.Prompt(prompt);
+            AnsiConsole.MarkupLine($"Selecione um [green]gÃªnero[/]: {genre}");
+
+
+            int totalChars = AnsiConsole.Ask<int>("Adicione a quantidade de [green]caracteres totais no livro[/]:", 10000);
+
+            AnsiConsole.MarkupLine("\n[green]*** NOVO LIVRO ***[/]");
+
+
+            AnsiConsole.MarkupLine($"Nome: {name}");
+            AnsiConsole.MarkupLine($"Autor: {author}");
+            AnsiConsole.MarkupLine($"GÃªnero: {genre.ToString()}");
+            AnsiConsole.MarkupLine($"Total de caracteres: {totalChars}");
+
+            if (AnsiConsole.Confirm("Confirma as informaÃ§Ãµes acima?"))
+            {
+                Book newBook = new(name, author, genre, totalChars);
+                tracker.AddBook(newBook);
+
+                AnsiConsole.Clear();
+                AnsiConsole.MarkupLine("[bold green]Livro adicionado com sucesso![/]\n");
+            }
+            else
+            {
+                AnsiConsole.Clear();
+                AnsiConsole.MarkupLine("\n[red]OperaÃ§Ã£o cancelada.[/]\n");
+            }
+        }
+
+        public static void EditBooks(ReadingService tracker)
+        {
+            string nomeMenu = "EDITANDO LIVRO";
+            Book book;
+            if (tracker.GetBooks().Count != 0)
+            {
+                book = PickABook(tracker);
+            }
+            else
+            {
+                AnsiConsole.Clear();
+                AnsiConsole.MarkupLine("[bold red]Nenhum livro encontrado.[/]");
+                return;
+            }
+
+            Dictionary<string, Action> cOptions = new()
+            {
+                { "Editar nome", () =>
+                    {
+                        String novoNome = AnsiConsole.Ask<string>("Adicione o [green]nome do livro[/]:", book.Name);
+                        string nomeAnterior = book.Name;
+                        book.Name = novoNome;
+                        if (book.Name == nomeAnterior)
+                        {
+                            AnsiConsole.Clear();
+                            AnsiConsole.MarkupLine("[yellow]Nome sem alteraÃ§Ã£o.[/]\n");
+                        } else
+                        {
+                            AnsiConsole.Clear();
+                            AnsiConsole.MarkupLine($"[green]Alterado com sucesso.[/]\n\nNovo nome: {book.Name}\n");
+                        }
+                    }
+                },
+                { "Remover livro", () =>
+                    {
+                        if (AnsiConsole.Confirm("Confirma remoÃ§Ã£o do livro?"))
+                        {
+                            tracker.RemoveBook(book.BookID);
+                            AnsiConsole.Clear();
+                            AnsiConsole.MarkupLine($"[green]Removido com sucesso.[/]\n");
+                        } else
+                        {
+                            AnsiConsole.Clear();
+                            AnsiConsole.MarkupLine("\n[red]OperaÃ§Ã£o cancelada.[/]\n");
+                        }
+                    }
+                },
+                {
+                    "Cancelar", () => { }
+                }
+            };
+
+            string choice = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title($"[green]--{nomeMenu}--[/]\nEscolha uma opÃ§Ã£o (livro selecionado: {book.Name}): ")
+                    .AddChoices(cOptions.Keys)
+            );
+            cOptions[choice].Invoke();
+        }
+
+        public static void PrintBooks(ReadingService tracker)
+        {
+            AnsiConsole.Clear();
+            if (tracker.GetBooks().Count == 0)
+            {
+                AnsiConsole.Write("Sem livros cadastrados.");
+            }
+            else
+            {
+                var table = new Table()
+                    .RoundedBorder()
+                    .BorderColor(Color.Grey);
+
+                table.AddColumn("Nome");
+                table.AddColumn("Autor");
+                table.AddColumn("GÃªnero");
+                table.AddColumn("Total de Chars.");
+
+                foreach (Book book in tracker.GetBooks())
+                {
+                    table.AddRow(book.Name, book.Author, book.BookGenre.ToString(), book.TotalChars.ToString());
+                }
+
+                AnsiConsole.Write(table);
+            }
+
+        }
+
+        internal static Book PickABook(ReadingService tracker)
+        {
+            return AnsiConsole.Prompt(
+                new SelectionPrompt<Book>()
+                    .Title("Escolha um livro:")
+                    .AddChoices(tracker.GetBooks())
+                    .UseConverter(book => book.Name)
+            );
+        }
+
+
+    }
+}
+
+
+
+================================================
+FILE: ReadingTracker.Console/ConsoleUI/ConsoleUI.cs
+================================================
+ï»¿using ReadingTracker.Core.Services;
+using Spectre.Console;
+
+namespace ReadingTracker.Console.ConsoleUI
+{
+    internal class ConsoleUI
+    {
+        public static void Start(ReadingService tracker)
+        {
+            string nomeMenu = "MENU PRINCIPAL";
+            RunMenu(nomeMenu, new()
+            {
+                { "Gerenciar dias de leitura", () => ManageReadingDay(tracker) },
+                { "Gerenciar livros", () => ManageBooks(tracker) },
+                { "Imprimir sumÃ¡rio", () => ReadingDayUI.PrintSummary(tracker) },
+            }, "Sair");
+        }
+
+        public static void ManageReadingDay(ReadingService tracker)
+        {
+            string nomeMenu = "GERENCIAR DIAS DE LEITURA";
+            RunMenu(nomeMenu, new()
+            {
+                { "Adicionar um dia de leitura", () => ReadingDayUI.AddReadingDay(tracker) },
+                { "Editar ou remover um dia de leitura", () => ReadingDayUI.EditReadingDay(tracker) }
+            }, "Voltar");
+
+        }
+
+
+        public static void ManageBooks(ReadingService tracker)
+        {
+            string nomeMenu = "GERENCIAR LIVROS";
+            RunMenu(nomeMenu, new()
+            {
+                { "Adicionar livros", () => BookUI.AddBook(tracker) },
+                { "Remover ou editar livros", () => BookUI.EditBooks(tracker)  },
+                { "Listar livros", () => BookUI.PrintBooks(tracker) }
+            }, "Voltar");
+        }
+
+
+
+        private static void RunMenu(string menuName, Dictionary<string, Action> options, string exit, string prompt = "Escolha uma opÃ§Ã£o:")
+        {
+            Dictionary<string, Action> cOptions = new(options)
+            {
+                { "Limpar console", () => { AnsiConsole.Clear(); } },
+                { exit, () => { } }
+            };
+            string choice = GetChoice(menuName, prompt, cOptions);
+
+            while (choice != exit)
+            {
+                cOptions[choice].Invoke();
+                choice = GetChoice(menuName, prompt, cOptions);
+            }
+        }
+
+        internal static string GetChoice(string menuName, string prompt, Dictionary<string, Action> options)
+        {
+            return AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title($"[green]--{menuName}--[/]\n{prompt}")
+                    .AddChoices(options.Keys)
+            );
+        }
+
+
+
+    }
+}
+
+
+
+================================================
+FILE: ReadingTracker.Console/ConsoleUI/ReadingDayUI.cs
+================================================
+ï»¿using ReadingTracker.Core.Data;
+using ReadingTracker.Core.Services;
+using Spectre.Console;
+
+namespace ReadingTracker.Console.ConsoleUI
+{
+    internal class ReadingDayUI
+    {
+        public static void AddReadingDay(ReadingService repo)
+        {
+            if (repo.GetBooks().Count == 0)
+            {
+                AnsiConsole.MarkupLine("[bold red]Nenhum livro encontrado. Adicione um livro antes de adicionar um dia de leitura.[/]");
+                return;
+            }
+
+            AnsiConsole.WriteLine();
+            Book book = BookUI.PickABook(repo);
+
+            DateOnly defaultDate = DateOnly.FromDateTime(DateTime.Now);
+
+            string dateString = AnsiConsole.Prompt(
+                new TextPrompt<string>("Informe a [green]data de leitura[/]:")
+                    .DefaultValue(defaultDate.ToString())
+                    .Validate(str =>
+                    {
+                        DateOnly aux;
+                        if (!DateOnly.TryParse(str, out aux))
+                        {
+                            return ValidationResult.Error("[red]Formato invÃ¡lido[/]");
+                        }
+
+                        return ValidationResult.Success();
+                    }));
+
+
+            DateOnly date = DateOnly.Parse(dateString);
+
+            int charsRead = AnsiConsole.Prompt(
+                new TextPrompt<int>("Adicione a quantidade de [green]caracteres lidos hoje[/]:")
+                    .Validate(chars =>
+                    {
+                        string? error = repo.ValidateCharsRead(book, chars);
+                        if (error != null)
+                            return ValidationResult.Error($"[red]{error}[/]");
+                        return ValidationResult.Success();
+                    })
+            );
+
+            double minutesRead = AnsiConsole.Prompt(
+                new TextPrompt<double>("Adicione a quantidade de [green]minutos lidos hoje[/]:")
+                    .Validate(minutes =>
+                    {
+                        string? error = ReadingService.ValidateMinsRead(minutes);
+                        if (error != null)
+                            return ValidationResult.Error($"[red]{error}[/]");
+                        return ValidationResult.Success();
+                    })
+            );
+
+            AnsiConsole.MarkupLine("\n[green]*** NOVO DIA DE LEITURA ***[/]");
+            AnsiConsole.MarkupLine($"Livro: {book.Name}");
+            AnsiConsole.MarkupLine($"Dia: {date}");
+            AnsiConsole.MarkupLine($"Caracteres lidos: {charsRead}");
+            AnsiConsole.MarkupLine($"Minutos lidos: {minutesRead}");
+
+            if (AnsiConsole.Confirm("Confirma as informaÃ§Ãµes acima?"))
+            {
+
+                TrackedDay newDay = new(book.BookID, date, charsRead, minutesRead);
+                repo.AddDay(newDay);
+
+                AnsiConsole.Clear();
+                AnsiConsole.MarkupLine("[bold green]Dia de leitura adicionado com sucesso![/]\n");
+
+            }
+            else
+            {
+                AnsiConsole.Clear();
+                AnsiConsole.MarkupLine("\n[red]OperaÃ§Ã£o cancelada.[/]\n");
+            }
+        }
+        public static void EditReadingDay(ReadingService repo)
+        {
+            string nomeMenu = "EDITANDO DIA DE LEITURA";
+            TrackedDay day;
+            if (repo.GetDays().Any())
+            {
+                day = PickAReadingDay(repo);
+            }
+            else
+            {
+                AnsiConsole.MarkupLine("[bold red]Nenhum dia de leitura registrado.[/]");
+                return;
+            }
+
+            Dictionary<string, Action> cOptions = new()
+            {
+                { "Alterar livro", () =>
+                    {
+                        Book newBook = BookUI.PickABook(repo);
+                        int prevBook = day.BookId;
+                        day.BookId = newBook.BookID;
+                        if (day.BookId == prevBook)
+                        {
+                            AnsiConsole.MarkupLine("[yellow]Esse livro jÃ¡ Ã© o selecionado.[/]\n");
+                        } else
+                        {
+                            AnsiConsole.MarkupLine($"[green]Alterado com sucesso.[/]\n\nNovo livro: {newBook.Name}\n");
+                        }
+                    }
+                },
+                { "Remover livro", () =>
+                    {
+                        if (AnsiConsole.Confirm("Confirma remoÃ§Ã£o do dia?"))
+                        {
+                            repo.RemoveDay(day.DayId);
+                            AnsiConsole.Clear();
+                            AnsiConsole.MarkupLine($"[green]Removido com sucesso.[/]\n");
+                        } else
+                        {
+                            AnsiConsole.Clear();
+                            AnsiConsole.MarkupLine("\n[red]OperaÃ§Ã£o cancelada.[/]\n");
+                        }
+                    }
+                },
+                {
+                    "Cancelar", () => { }
+                }
+            };
+
+            string choice = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title($"[green]--{nomeMenu}--[/]\nEscolha uma opÃ§Ã£o (dia selecionado: {day.Date}): ")
+                    .AddChoices(cOptions.Keys)
+            );
+            cOptions[choice].Invoke();
+        }
+
+        public static void PrintSummary(ReadingService repo)
+        {
+            AnsiConsole.Clear();
+
+            if (repo.GetDays().Count == 0)
+            {
+                AnsiConsole.MarkupLine("[red]Sem registros.[/]\n");
+                return;
+            }
+
+            var table = new Table();
+
+            table.AddColumn("Data");
+            table.AddColumn("Livro");
+            table.AddColumn("Caracteres Lidos");
+            table.AddColumn("Minutos Lidos");
+            table.AddColumn("Porcentagem Lida");
+            foreach (var day in repo.GetDays())
+            {
+                Book? book = repo.GetBooks().Find(b => b.BookID == day.BookId);
+                table.AddRow(
+                    day.Date.ToString(),
+                    book?.Name ?? "--deleted--",
+                    day.CharsRead.ToString(),
+                    day.MinutesRead.ToString(),
+                    (book != null ? book.CalculatePercentRead(repo.CalculateAlreadyRead(book)).ToString("F2") + "%" : "N/A")
+                    );
+            }
+
+            AnsiConsole.Write(table);
+        }
+        static TrackedDay PickAReadingDay(ReadingService repo)
+        {
+            return AnsiConsole.Prompt(
+                new SelectionPrompt<TrackedDay>()
+                    .Title("Escolha um dia:")
+                    .AddChoices(repo.GetDays())
+                    .UseConverter(day => $"{day.Date} - {repo.GetBooks().Find(book => book.BookID == day.BookId)?.Name ?? "--deleted--"}")
+            );
+        }
+
+
+
+    }
+}
+
+
+
+================================================
+FILE: ReadingTracker.Console/Properties/launchSettings.json
+================================================
+{
+  "profiles": {
+    "ReadingTracker": {
+      "commandName": "Project"
+    },
+    "WSL": {
+      "commandName": "WSL2",
+      "distributionName": ""
+    }
+  }
+}
+
+
+================================================
+FILE: ReadingTracker.Core/ReadingTracker.Core.csproj
+================================================
+ï»¿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>
+
+
+
+================================================
+FILE: ReadingTracker.Core/Data/Book.cs
+================================================
+ï»¿using System.Text.Json.Serialization;
+
+namespace ReadingTracker.Core.Data
+{
+    public class Book
+    {
+        [JsonInclude]
+        public int BookID { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Author { get; set; } = string.Empty;
+        public Genre BookGenre { get; set; }
+        public int TotalChars { get; set; }
+        public bool IsCompleted { get; set; }
+
+        public Book() { }
+
+        public Book(string name, string author, Genre genre, int totalChars)
+        {
+            Name = name;
+            Author = author;
+            BookGenre = genre;
+            TotalChars = totalChars;
+        }
+
+        public double CalculatePercentRead(int readChars)
+        {
+            if (TotalChars == 0) return 0;
+            return (double)readChars / TotalChars * 100;
+        }
+    }
+}
+
+
+================================================
+FILE: ReadingTracker.Core/Data/Genre.cs
+================================================
+ï»¿namespace ReadingTracker.Core.Data;
+
+public enum Genre
+{
+    Action = 1,
+    Adventure = 2,
+    Comedy = 3,
+    Drama = 4,
+    Ecchi = 5,
+    Fantasy = 6,
+    Horror = 7,
+    Mecha = 8,
+    Music = 9,
+    Mystery = 10,
+    Psychological = 11,
+    Romance = 12,
+    SciFi = 13,
+    SliceOfLife = 14,
+    Sports = 15,
+    Supernatural = 16,
+    Thriller = 17
+}
+
+
+================================================
+FILE: ReadingTracker.Core/Data/Series.cs
+================================================
+ï»¿namespace ReadingTracker.Core.Data
+{
+    public class Series
+    {
+        public int SeriesID { get; private set; } = Guid.NewGuid().GetHashCode();
+        public string Name { get; private set; } = string.Empty;
+        public string Author { get; private set; } = string.Empty;
+        private List<Genre> Genre { get; set; } = [];
+        private List<Book> Books { get; set; } = [];
+
+        public List<Genre> GetGenres() => Genre;
+
+        public List<Book> GetBooks() => Books;
+
+        public void AddGenre(Genre genre)
+        {
+            if (!Genre.Contains(genre))
+            {
+                Genre.Add(genre);
+            }
+        }
+
+        public void AddBook(Book book)
+        {
+            if (!Books.Any(b => b.BookID == book.BookID))
+            {
+                Books.Add(book);
+            }
+        }
+
+        public Series() { }
+
+        public Series(string name, string author)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException("Series name cannot be empty.");
+            }
+
+            if (string.IsNullOrWhiteSpace(author))
+            {
+                throw new ArgumentException("Author name cannot be empty.");
+            }
+
+            Name = name;
+            Author = author;
+        }
+    }
+}
+
+
+
+================================================
+FILE: ReadingTracker.Core/Data/TrackedDay.cs
+================================================
+ï»¿using System.Text.Json.Serialization;
+
+namespace ReadingTracker.Core.Data
+{
+    public class TrackedDay
+    {
+        [JsonInclude]
+        public int DayId { get; set; }
+        public int BookId { get; set; }
+        public DateOnly Date { get; set; }
+        public int CharsRead { get; set; }
+        public double MinutesRead { get; set; }
+
+        public TrackedDay() { }
+
+        public TrackedDay(int bookId, DateOnly date, int charsRead, double minutesRead)
+        {
+            BookId = bookId;
+            Date = date;
+            CharsRead = charsRead;
+            MinutesRead = minutesRead;
+        }
+    }
+}
+
+
+================================================
+FILE: ReadingTracker.Core/Repositories/IReadingRepository.cs
+================================================
+ï»¿using ReadingTracker.Core.Data;
+
+namespace ReadingTracker.Core.Repositories
+{
+    public interface IReadingRepository
+    {
+        List<Book> GetBooks();
+        void AddBook(Book book);
+        void RemoveBook(int bookId);
+        List<TrackedDay> GetDays();
+        void AddDay(TrackedDay day);
+        void RemoveDay(int dayId);
+
+    }
+}
+
+
+
+================================================
+FILE: ReadingTracker.Core/Repositories/JsonRepository.cs
+================================================
+ï»¿using ReadingTracker.Core.Data;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Unicode;
+
+namespace ReadingTracker.Core.Repositories
+{
+
+    internal class SaveData()
+    {
+        public List<Book> Books { get; set; } = [];
+        public List<TrackedDay> Days { get; set; } = [];
+    }
+
+    public class JsonRepository : IReadingRepository
+    {
+
+        private readonly List<Book> _bookList = [];
+        private readonly List<TrackedDay> _daysList = [];
+
+        public List<Book> GetBooks()
+        {
+            return [.. _bookList];
+        }
+
+        public void AddBook(Book book)
+        {
+            if (_bookList.Count == 0)
+            {
+                book.BookID = 1;
+            }
+            else
+            {
+                book.BookID = _bookList.Max(b => b.BookID) + 1;
+            }
+
+            _bookList.Add(book);
+            Save();
+        }
+
+        public void RemoveBook(int bookId)
+        {
+            _bookList.RemoveAll(b => b.BookID == bookId);
+            Save();
+        }
+
+        public List<TrackedDay> GetDays()
+        {
+            return [.. _daysList];
+        }
+
+        public void AddDay(TrackedDay day)
+        {
+            if (_daysList.Count == 0)
+            {
+                day.DayId = 1;
+            }
+            else
+            {
+                day.DayId = _daysList.Max(d => d.DayId) + 1;
+            }
+
+            _daysList.Add(day); _daysList.Sort((d1, d2) => d1.Date.CompareTo(d2.Date));
+            Save();
+        }
+
+        public void RemoveDay(int dayId)
+        {
+            _daysList.RemoveAll(d => d.DayId == dayId);
+            Save();
+        }
+
+        private readonly static JsonSerializerOptions options = new()
+        {
+            Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
+            WriteIndented = true,
+            IncludeFields = true
+        };
+        internal void Save()
+        {
+
+            SaveData dataToSave = new()
+            {
+                Books = _bookList,
+                Days = _daysList
+            };
+
+            string jsonString = JsonSerializer.Serialize(dataToSave, options);
+
+            File.WriteAllText("data.json", jsonString);
+
+        }
+        public string? Load()
+        {
+            if (!File.Exists("data.json"))
+            {
+                return "Nenhum arquivo de salvamento encontrado. Iniciando com um tracker vazio.";
+            }
+
+            string jsonString = File.ReadAllText("data.json");
+            var loadedData = JsonSerializer.Deserialize<SaveData>(jsonString, options);
+
+            if (loadedData != null)
+            {
+                _bookList.Clear();
+                _daysList.Clear();
+
+                _bookList.AddRange(loadedData.Books);
+                _daysList.AddRange(loadedData.Days);
+            }
+            return null;
+        }
+
+
+    }
+}
+
+
+
+================================================
+FILE: ReadingTracker.Core/Services/ReadingService.cs
+================================================
+ï»¿using ReadingTracker.Core.Data;
+using ReadingTracker.Core.Repositories;
+
+namespace ReadingTracker.Core.Services
+{
+    public class ReadingService(IReadingRepository repository)
+    {
+        private readonly IReadingRepository _readingRepository = repository;
+
+
+        public void AddBook(Book book)
+        {
+            _readingRepository.AddBook(book);
+        }
+        public void RemoveBook(int bookId)
+        {
+            _readingRepository.RemoveBook(bookId);
+        }
+
+        public List<Book> GetBooks()
+        {
+            return _readingRepository.GetBooks();
+        }
+
+        public void AddDay(TrackedDay day)
+        {
+            _readingRepository.AddDay(day);
+        }
+
+        public void RemoveDay(int dayId)
+        {
+            _readingRepository.RemoveDay(dayId);
+        }
+
+        public List<TrackedDay> GetDays()
+        {
+            return _readingRepository.GetDays();
+        }
+
+        public List<TrackedDay> GetDaysFromBookId(int bookId)
+        {
+            return _readingRepository.GetDays().FindAll(d => d.BookId == bookId);
+        }
+
+        public string? ValidateCharsRead(Book book, int chars)
+        {
+            if (chars <= 0)
+                return "O nÃºmero de caracteres lidos nÃ£o pode ser nulo ou negativo.";
+            if (chars + CalculateAlreadyRead(book) > book.TotalChars)
+                return $"NÃ£o pode exceder o total do livro ({book.TotalChars}).";
+            return null;
+        }
+
+        public static string? ValidateMinsRead(double mins)
+        {
+            if (mins < 0) 
+                return "O nÃºmero de minutos lidos nÃ£o pode ser negativo.";
+            return null;
+        }
+
+        public int CalculateAlreadyRead(Book book)
+        {
+            return _readingRepository.GetDays()
+                .Where(d => d.BookId == book.BookID)
+                .Sum(d => d.CharsRead);
+        }
+    }
+}
+
+
+
+================================================
+FILE: ReadingTracker.GUI/AddBook.cs
+================================================
+ï»¿using ReadingTracker.Core.Data;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Text;
+using System.Windows.Forms;
+using System.Xml.Linq;
+
+namespace ReadingTracker.GUI
+{
+    public partial class AddBook : Form
+    {
+        public Book? NewBook { get; private set; }
+        public AddBook()
+        {
+            InitializeComponent();
+        }
+
+        private void saveBookBtn_Click(object sender, EventArgs e)
+        {
+
+            if (String.IsNullOrEmpty(txtName.Text) || String.IsNullOrEmpty(txtAuthor.Text))
+            {
+                MessageBox.Show("Os campos nÃ£o podem estar vazios.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            string name = txtName.Text;
+            string author = txtAuthor.Text;
+
+            if (!int.TryParse(txtTotalChars.Text, out int totalChars))
+            {
+                MessageBox.Show("NÃºmero com valor vazio ou invÃ¡lido.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            Genre selectedGenre = (Genre)comboBoxGenre.SelectedItem;
+
+            NewBook = new Book(name, author, selectedGenre, totalChars);
+
+            this.DialogResult = DialogResult.OK;
+        }
+
+        private void AddBook_Load(object sender, EventArgs e)
+        {
+            comboBoxGenre.DataSource = Enum.GetValues<Genre>();
+
+        }
+    }
+}
+
+
+
+================================================
+FILE: ReadingTracker.GUI/AddBook.Designer.cs
+================================================
+ï»¿namespace ReadingTracker.GUI
+{
+    partial class AddBook
+    {
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            txtName = new TextBox();
+            saveBookBtn = new Button();
+            lblBookName = new Label();
+            txtAuthor = new TextBox();
+            lblAuthorName = new Label();
+            txtTotalChars = new TextBox();
+            lblTotalChars = new Label();
+            lblGenre = new Label();
+            comboBoxGenre = new ComboBox();
+            SuspendLayout();
+            // 
+            // txtName
+            // 
+            txtName.Location = new Point(140, 31);
+            txtName.Name = "txtName";
+            txtName.Size = new Size(100, 23);
+            txtName.TabIndex = 0;
+            // 
+            // saveBookBtn
+            // 
+            saveBookBtn.Location = new Point(103, 161);
+            saveBookBtn.Name = "saveBookBtn";
+            saveBookBtn.Size = new Size(75, 23);
+            saveBookBtn.TabIndex = 4;
+            saveBookBtn.Text = "OK";
+            saveBookBtn.UseVisualStyleBackColor = true;
+            saveBookBtn.Click += saveBookBtn_Click;
+            // 
+            // lblBookName
+            // 
+            lblBookName.AutoSize = true;
+            lblBookName.Location = new Point(90, 34);
+            lblBookName.Name = "lblBookName";
+            lblBookName.Size = new Size(37, 15);
+            lblBookName.TabIndex = 2;
+            lblBookName.Text = "TÃ­tulo";
+            // 
+            // txtAuthor
+            // 
+            txtAuthor.Location = new Point(140, 60);
+            txtAuthor.Name = "txtAuthor";
+            txtAuthor.Size = new Size(100, 23);
+            txtAuthor.TabIndex = 1;
+            // 
+            // lblAuthorName
+            // 
+            lblAuthorName.AutoSize = true;
+            lblAuthorName.Location = new Point(90, 63);
+            lblAuthorName.Name = "lblAuthorName";
+            lblAuthorName.Size = new Size(37, 15);
+            lblAuthorName.TabIndex = 2;
+            lblAuthorName.Text = "Autor";
+            // 
+            // txtTotalChars
+            // 
+            txtTotalChars.Location = new Point(140, 89);
+            txtTotalChars.Name = "txtTotalChars";
+            txtTotalChars.Size = new Size(100, 23);
+            txtTotalChars.TabIndex = 2;
+            // 
+            // lblTotalChars
+            // 
+            lblTotalChars.AutoSize = true;
+            lblTotalChars.Location = new Point(37, 92);
+            lblTotalChars.Name = "lblTotalChars";
+            lblTotalChars.Size = new Size(90, 15);
+            lblTotalChars.TabIndex = 2;
+            lblTotalChars.Text = "Total Caracteres";
+            // 
+            // lblGenre
+            // 
+            lblGenre.AutoSize = true;
+            lblGenre.Location = new Point(82, 126);
+            lblGenre.Name = "lblGenre";
+            lblGenre.Size = new Size(45, 15);
+            lblGenre.TabIndex = 2;
+            lblGenre.Text = "GÃªnero";
+            // 
+            // comboBoxGenre
+            // 
+            comboBoxGenre.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboBoxGenre.FormattingEnabled = true;
+            comboBoxGenre.Location = new Point(140, 118);
+            comboBoxGenre.Name = "comboBoxGenre";
+            comboBoxGenre.Size = new Size(100, 23);
+            comboBoxGenre.TabIndex = 3;
+            // 
+            // AddBook
+            // 
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(288, 217);
+            Controls.Add(lblGenre);
+            Controls.Add(lblTotalChars);
+            Controls.Add(lblAuthorName);
+            Controls.Add(lblBookName);
+            Controls.Add(txtName);
+            Controls.Add(txtAuthor);
+            Controls.Add(txtTotalChars);
+            Controls.Add(comboBoxGenre);
+            Controls.Add(saveBookBtn);
+            Name = "AddBook";
+            StartPosition = FormStartPosition.CenterParent;
+            Text = "Adicionar Livro";
+            Load += AddBook_Load;
+            ResumeLayout(false);
+            PerformLayout();
+        }
+
+        #endregion
+
+        private TextBox txtName;
+        private Button saveBookBtn;
+        private Label lblBookName;
+        private TextBox txtAuthor;
+        private Label lblAuthorName;
+        private TextBox txtTotalChars;
+        private Label lblTotalChars;
+        private Label lblGenre;
+        private ComboBox comboBoxGenre;
+    }
+}
+
+
+================================================
+FILE: ReadingTracker.GUI/AddBook.resx
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!--
+    Microsoft ResX Schema
+
+    Version 2.0
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
+    associated with the data types.
+
+    Example:
+
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+
+    There are any number of "resheader" rows that contain simple
+    name/value pairs.
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
+    mimetype set.
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
+    extensible. For a given mimetype the value must be set accordingly:
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
+    read any of the formats listed below.
+
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+</root>
+
+
+================================================
+FILE: ReadingTracker.GUI/MainWindow.cs
+================================================
+ï»¿using ReadingTracker.Core.Data;
+using ReadingTracker.Core.Repositories;
+using ReadingTracker.Core.Services;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Net;
+using System.Text;
+using System.Windows.Forms;
+
+namespace ReadingTracker.GUI
+{
+    public partial class MainWindow : Form
+
+    {
+        private ReadingService _service;
+        private int _selectedBookId;
+        public MainWindow(ReadingService readingService)
+        {
+            InitializeComponent();
+            _service = readingService;
+            _selectedBookId = -1;
+        }
+
+        private void toolStripButton1_Click(object sender, EventArgs e)
+        {
+            using (AddBook popup = new AddBook())
+            {
+                if (popup.ShowDialog() == DialogResult.OK)
+                {
+                    if (popup.NewBook != null)
+                    {
+                        _service.AddBook(popup.NewBook);
+
+                        RefreshGrid();
+                    }
+                }
+            }
+        }
+
+        private void RefreshGrid()
+        {
+            bookBindingSource.DataSource = null; // Clear the old cache
+            bookBindingSource.DataSource = _service.GetBooks(); // Load the fresh list
+        }
+
+        private void dgvBooks_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+
+            lblSelectedBook.Text = dgvBooks.Rows[index: e.RowIndex].Cells["nameDataGridViewTextBoxColumn"].Value?.ToString() ?? "what";
+
+            if (!int.TryParse(dgvBooks.Rows[e.RowIndex].Cells["bookIDDataGridViewTextBoxColumn"].Value?.ToString(), out int bookId))
+                return;
+
+            ToggleVisibleElements(true);
+
+            _selectedBookId = bookId;
+
+            Book book = _service.GetBooks().Find(b => b.BookID == bookId);
+            lblSelectedBook.Text = book.Name;
+            lblAuthorInfo.Text = book.Author;
+            lblGenreInfo.Text = book.BookGenre.ToString();
+            lblCharsInfo.Text = book.TotalChars.ToString();
+            lblIsFinishedInfo.Text = book.IsCompleted ? "Sim" : "NÃ£o";
+
+
+            miniDaysBindingSource.DataSource = _service.GetDaysFromBookId(bookId);
+        }
+
+        private void MainWindow_Load(object sender, EventArgs e)
+        {
+            bookBindingSource.DataSource = _service.GetBooks();
+            ToggleVisibleElements(false);
+            lblNoBookSelected.Visible = true;
+        }
+
+        private void ToggleVisibleElements(bool visible)
+        {
+            dgvMiniDays.Visible = visible;
+            btnDeleteBook.Visible = visible;
+            lblNome.Visible = visible;
+            lblSelectedBook.Visible = visible;
+            lblAuthor.Visible = visible;
+            lblAuthorInfo.Visible = visible;
+            lblChars.Visible = visible;
+            lblCharsInfo.Visible = visible;
+            lblGenre.Visible = visible;
+            lblGenreInfo.Visible = visible;
+            lbIsFinished.Visible = visible;
+            lblIsFinishedInfo.Visible = visible;
+            lblNoBookSelected.Visible = !visible;
+        }
+
+        private void btnDeleteBook_Click(object sender, EventArgs e)
+        {
+            if (_selectedBookId != -1)
+            {
+                var confirmResult = MessageBox.Show("Certeza que deseja deletar este livro?",
+                                     "Confirmar deletaÃ§Ã£o",
+                                     MessageBoxButtons.YesNo);
+                if (confirmResult == DialogResult.Yes)
+                {
+                    _service.RemoveBook(_selectedBookId);
+
+
+                    _selectedBookId = -1;
+
+                    ToggleVisibleElements(false);
+                    RefreshGrid();
+                }
+                else
+                {
+                    return;
+                }
+
+
+            }
+
+
+        }
+
+        private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
+        {
+            var result = from day in _service.GetDays()
+                         group day by day.Date into groupData
+                         select new
+                         {
+                             Category = groupData.Key,
+                             TotalChars = groupData.Sum(x => x.CharsRead),
+                             TotalMins = groupData.Sum(x => x.MinutesRead)
+                         };
+
+            groupedDaysBindingSource.DataSource = result;
+        }
+    }
+}
+
+
+
+================================================
+FILE: ReadingTracker.GUI/MainWindow.Designer.cs
+================================================
+ï»¿namespace ReadingTracker.GUI
+{
+    partial class MainWindow
+    {
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            components = new System.ComponentModel.Container();
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
+            bookBindingSource = new BindingSource(components);
+            tabMainTabs = new TabControl();
+            Livros = new TabPage();
+            gboxBookInfo = new GroupBox();
+            lblNoBookSelected = new Label();
+            lblIsFinishedInfo = new Label();
+            lblAuthorInfo = new Label();
+            lblCharsInfo = new Label();
+            lblGenreInfo = new Label();
+            lblChars = new Label();
+            lbIsFinished = new Label();
+            lblAuthor = new Label();
+            lblGenre = new Label();
+            lblNome = new Label();
+            lblSelectedBook = new Label();
+            gboxDias = new GroupBox();
+            dgvMiniDays = new DataGridView();
+            Date = new DataGridViewTextBoxColumn();
+            CharsLido = new DataGridViewTextBoxColumn();
+            Minutos = new DataGridViewTextBoxColumn();
+            miniDaysBindingSource = new BindingSource(components);
+            dgvBooks = new DataGridView();
+            bookIDDataGridViewTextBoxColumn = new DataGridViewTextBoxColumn();
+            nameDataGridViewTextBoxColumn = new DataGridViewTextBoxColumn();
+            authorDataGridViewTextBoxColumn = new DataGridViewTextBoxColumn();
+            bookGenreDataGridViewTextBoxColumn = new DataGridViewTextBoxColumn();
+            totalCharsDataGridViewTextBoxColumn = new DataGridViewTextBoxColumn();
+            isCompletedDataGridViewCheckBoxColumn = new DataGridViewCheckBoxColumn();
+            btnDeleteBook = new Button();
+            Dias = new TabPage();
+            dgvTrackedDays = new DataGridView();
+            TrackedDate = new DataGridViewTextBoxColumn();
+            groupedDaysBindingSource = new BindingSource(components);
+            dateDayFilter = new DateTimePicker();
+            toolStrip1 = new ToolStrip();
+            toolStripButton1 = new ToolStripButton();
+            statusStrip1 = new StatusStrip();
+            ((System.ComponentModel.ISupportInitialize)bookBindingSource).BeginInit();
+            tabMainTabs.SuspendLayout();
+            Livros.SuspendLayout();
+            gboxBookInfo.SuspendLayout();
+            gboxDias.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvMiniDays).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)miniDaysBindingSource).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dgvBooks).BeginInit();
+            Dias.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvTrackedDays).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)groupedDaysBindingSource).BeginInit();
+            toolStrip1.SuspendLayout();
+            SuspendLayout();
+            // 
+            // bookBindingSource
+            // 
+            bookBindingSource.DataSource = typeof(Core.Data.Book);
+            // 
+            // tabMainTabs
+            // 
+            tabMainTabs.Controls.Add(Livros);
+            tabMainTabs.Controls.Add(Dias);
+            tabMainTabs.Location = new Point(12, 27);
+            tabMainTabs.Name = "tabMainTabs";
+            tabMainTabs.SelectedIndex = 0;
+            tabMainTabs.Size = new Size(955, 542);
+            tabMainTabs.TabIndex = 1;
+            // 
+            // Livros
+            // 
+            Livros.Controls.Add(gboxBookInfo);
+            Livros.Controls.Add(gboxDias);
+            Livros.Controls.Add(dgvBooks);
+            Livros.Controls.Add(btnDeleteBook);
+            Livros.Location = new Point(4, 24);
+            Livros.Name = "Livros";
+            Livros.Padding = new Padding(3);
+            Livros.Size = new Size(947, 514);
+            Livros.TabIndex = 0;
+            Livros.Text = "Livros";
+            Livros.UseVisualStyleBackColor = true;
+            // 
+            // gboxBookInfo
+            // 
+            gboxBookInfo.Controls.Add(lblNoBookSelected);
+            gboxBookInfo.Controls.Add(lblIsFinishedInfo);
+            gboxBookInfo.Controls.Add(lblAuthorInfo);
+            gboxBookInfo.Controls.Add(lblCharsInfo);
+            gboxBookInfo.Controls.Add(lblGenreInfo);
+            gboxBookInfo.Controls.Add(lblChars);
+            gboxBookInfo.Controls.Add(lbIsFinished);
+            gboxBookInfo.Controls.Add(lblAuthor);
+            gboxBookInfo.Controls.Add(lblGenre);
+            gboxBookInfo.Controls.Add(lblNome);
+            gboxBookInfo.Controls.Add(lblSelectedBook);
+            gboxBookInfo.Location = new Point(724, 6);
+            gboxBookInfo.Name = "gboxBookInfo";
+            gboxBookInfo.Size = new Size(217, 143);
+            gboxBookInfo.TabIndex = 9;
+            gboxBookInfo.TabStop = false;
+            gboxBookInfo.Text = "InformaÃ§Ãµes do Livro";
+            // 
+            // lblNoBookSelected
+            // 
+            lblNoBookSelected.Location = new Point(30, 33);
+            lblNoBookSelected.Name = "lblNoBookSelected";
+            lblNoBookSelected.Size = new Size(156, 15);
+            lblNoBookSelected.TabIndex = 13;
+            lblNoBookSelected.Text = "Nenhum livro selecionado.";
+            // 
+            // lblIsFinishedInfo
+            // 
+            lblIsFinishedInfo.Location = new Point(75, 107);
+            lblIsFinishedInfo.Name = "lblIsFinishedInfo";
+            lblIsFinishedInfo.Size = new Size(133, 15);
+            lblIsFinishedInfo.TabIndex = 12;
+            // 
+            // lblAuthorInfo
+            // 
+            lblAuthorInfo.Location = new Point(52, 62);
+            lblAuthorInfo.Name = "lblAuthorInfo";
+            lblAuthorInfo.Size = new Size(156, 15);
+            lblAuthorInfo.TabIndex = 11;
+            // 
+            // lblCharsInfo
+            // 
+            lblCharsInfo.Location = new Point(75, 92);
+            lblCharsInfo.Name = "lblCharsInfo";
+            lblCharsInfo.Size = new Size(133, 15);
+            lblCharsInfo.TabIndex = 11;
+            // 
+            // lblGenreInfo
+            // 
+            lblGenreInfo.Location = new Point(55, 77);
+            lblGenreInfo.Name = "lblGenreInfo";
+            lblGenreInfo.Size = new Size(156, 15);
+            lblGenreInfo.TabIndex = 11;
+            // 
+            // lblChars
+            // 
+            lblChars.AutoSize = true;
+            lblChars.Location = new Point(6, 92);
+            lblChars.Name = "lblChars";
+            lblChars.Size = new Size(65, 15);
+            lblChars.TabIndex = 10;
+            lblChars.Text = "Caracteres:";
+            // 
+            // lbIsFinished
+            // 
+            lbIsFinished.AutoSize = true;
+            lbIsFinished.Location = new Point(6, 107);
+            lbIsFinished.Name = "lbIsFinished";
+            lbIsFinished.Size = new Size(63, 15);
+            lbIsFinished.TabIndex = 10;
+            lbIsFinished.Text = "Finalizado:";
+            // 
+            // lblAuthor
+            // 
+            lblAuthor.AutoSize = true;
+            lblAuthor.Location = new Point(6, 62);
+            lblAuthor.Name = "lblAuthor";
+            lblAuthor.Size = new Size(40, 15);
+            lblAuthor.TabIndex = 9;
+            lblAuthor.Text = "Autor:";
+            // 
+            // lblGenre
+            // 
+            lblGenre.AutoSize = true;
+            lblGenre.Location = new Point(6, 77);
+            lblGenre.Name = "lblGenre";
+            lblGenre.Size = new Size(48, 15);
+            lblGenre.TabIndex = 9;
+            lblGenre.Text = "GÃªnero:";
+            // 
+            // lblNome
+            // 
+            lblNome.AutoSize = true;
+            lblNome.Location = new Point(6, 19);
+            lblNome.Name = "lblNome";
+            lblNome.Size = new Size(43, 15);
+            lblNome.TabIndex = 8;
+            lblNome.Text = "Nome:";
+            // 
+            // lblSelectedBook
+            // 
+            lblSelectedBook.Location = new Point(55, 19);
+            lblSelectedBook.Name = "lblSelectedBook";
+            lblSelectedBook.Size = new Size(153, 44);
+            lblSelectedBook.TabIndex = 14;
+            // 
+            // gboxDias
+            // 
+            gboxDias.Controls.Add(dgvMiniDays);
+            gboxDias.Location = new Point(724, 155);
+            gboxDias.Name = "gboxDias";
+            gboxDias.Size = new Size(217, 182);
+            gboxDias.TabIndex = 7;
+            gboxDias.TabStop = false;
+            gboxDias.Text = "Dias";
+            // 
+            // dgvMiniDays
+            // 
+            dgvMiniDays.AllowUserToAddRows = false;
+            dgvMiniDays.AllowUserToDeleteRows = false;
+            dgvMiniDays.AllowUserToResizeColumns = false;
+            dgvMiniDays.AllowUserToResizeRows = false;
+            dgvMiniDays.AutoGenerateColumns = false;
+            dgvMiniDays.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = SystemColors.Control;
+            dataGridViewCellStyle1.Font = new Font("Segoe UI", 7F);
+            dataGridViewCellStyle1.ForeColor = SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
+            dgvMiniDays.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dgvMiniDays.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvMiniDays.Columns.AddRange(new DataGridViewColumn[] { Date, CharsLido, Minutos });
+            dgvMiniDays.DataSource = miniDaysBindingSource;
+            dgvMiniDays.Location = new Point(6, 22);
+            dgvMiniDays.Name = "dgvMiniDays";
+            dgvMiniDays.ReadOnly = true;
+            dgvMiniDays.RowHeadersVisible = false;
+            dgvMiniDays.RowHeadersWidth = 30;
+            dgvMiniDays.RowTemplate.Height = 20;
+            dgvMiniDays.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvMiniDays.Size = new Size(202, 150);
+            dgvMiniDays.TabIndex = 5;
+            // 
+            // Date
+            // 
+            Date.DataPropertyName = "Date";
+            Date.HeaderText = "Data";
+            Date.Name = "Date";
+            Date.ReadOnly = true;
+            // 
+            // CharsLido
+            // 
+            CharsLido.DataPropertyName = "CharsRead";
+            CharsLido.HeaderText = "C. Lidos";
+            CharsLido.Name = "CharsLido";
+            CharsLido.ReadOnly = true;
+            // 
+            // Minutos
+            // 
+            Minutos.DataPropertyName = "MinutesRead";
+            Minutos.HeaderText = "Minutos";
+            Minutos.Name = "Minutos";
+            Minutos.ReadOnly = true;
+            // 
+            // dgvBooks
+            // 
+            dgvBooks.AllowUserToAddRows = false;
+            dgvBooks.AllowUserToDeleteRows = false;
+            dgvBooks.AllowUserToResizeColumns = false;
+            dgvBooks.AllowUserToResizeRows = false;
+            dgvBooks.AutoGenerateColumns = false;
+            dgvBooks.BackgroundColor = SystemColors.Control;
+            dgvBooks.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvBooks.Columns.AddRange(new DataGridViewColumn[] { bookIDDataGridViewTextBoxColumn, nameDataGridViewTextBoxColumn, authorDataGridViewTextBoxColumn, bookGenreDataGridViewTextBoxColumn, totalCharsDataGridViewTextBoxColumn, isCompletedDataGridViewCheckBoxColumn });
+            dgvBooks.DataSource = bookBindingSource;
+            dgvBooks.Dock = DockStyle.Left;
+            dgvBooks.GridColor = SystemColors.Control;
+            dgvBooks.Location = new Point(3, 3);
+            dgvBooks.MultiSelect = false;
+            dgvBooks.Name = "dgvBooks";
+            dgvBooks.ReadOnly = true;
+            dgvBooks.RowHeadersVisible = false;
+            dgvBooks.RowTemplate.Height = 20;
+            dgvBooks.RowTemplate.ReadOnly = true;
+            dgvBooks.ScrollBars = ScrollBars.None;
+            dgvBooks.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvBooks.Size = new Size(715, 508);
+            dgvBooks.TabIndex = 0;
+            dgvBooks.VirtualMode = true;
+            dgvBooks.CellMouseClick += dgvBooks_CellMouseClick;
+            // 
+            // bookIDDataGridViewTextBoxColumn
+            // 
+            bookIDDataGridViewTextBoxColumn.DataPropertyName = "BookID";
+            bookIDDataGridViewTextBoxColumn.HeaderText = "ID";
+            bookIDDataGridViewTextBoxColumn.Name = "bookIDDataGridViewTextBoxColumn";
+            bookIDDataGridViewTextBoxColumn.ReadOnly = true;
+            bookIDDataGridViewTextBoxColumn.Resizable = DataGridViewTriState.False;
+            bookIDDataGridViewTextBoxColumn.Width = 50;
+            // 
+            // nameDataGridViewTextBoxColumn
+            // 
+            nameDataGridViewTextBoxColumn.DataPropertyName = "Name";
+            nameDataGridViewTextBoxColumn.HeaderText = "TÃ­tulo";
+            nameDataGridViewTextBoxColumn.Name = "nameDataGridViewTextBoxColumn";
+            nameDataGridViewTextBoxColumn.ReadOnly = true;
+            nameDataGridViewTextBoxColumn.Width = 240;
+            // 
+            // authorDataGridViewTextBoxColumn
+            // 
+            authorDataGridViewTextBoxColumn.DataPropertyName = "Author";
+            authorDataGridViewTextBoxColumn.HeaderText = "Autor";
+            authorDataGridViewTextBoxColumn.Name = "authorDataGridViewTextBoxColumn";
+            authorDataGridViewTextBoxColumn.ReadOnly = true;
+            authorDataGridViewTextBoxColumn.Width = 106;
+            // 
+            // bookGenreDataGridViewTextBoxColumn
+            // 
+            bookGenreDataGridViewTextBoxColumn.DataPropertyName = "BookGenre";
+            bookGenreDataGridViewTextBoxColumn.HeaderText = "GÃªnero";
+            bookGenreDataGridViewTextBoxColumn.Name = "bookGenreDataGridViewTextBoxColumn";
+            bookGenreDataGridViewTextBoxColumn.ReadOnly = true;
+            bookGenreDataGridViewTextBoxColumn.Width = 105;
+            // 
+            // totalCharsDataGridViewTextBoxColumn
+            // 
+            totalCharsDataGridViewTextBoxColumn.DataPropertyName = "TotalChars";
+            totalCharsDataGridViewTextBoxColumn.HeaderText = "Caracteres";
+            totalCharsDataGridViewTextBoxColumn.Name = "totalCharsDataGridViewTextBoxColumn";
+            totalCharsDataGridViewTextBoxColumn.ReadOnly = true;
+            totalCharsDataGridViewTextBoxColumn.Width = 106;
+            // 
+            // isCompletedDataGridViewCheckBoxColumn
+            // 
+            isCompletedDataGridViewCheckBoxColumn.DataPropertyName = "IsCompleted";
+            isCompletedDataGridViewCheckBoxColumn.HeaderText = "Finalizado";
+            isCompletedDataGridViewCheckBoxColumn.Name = "isCompletedDataGridViewCheckBoxColumn";
+            isCompletedDataGridViewCheckBoxColumn.ReadOnly = true;
+            isCompletedDataGridViewCheckBoxColumn.Width = 106;
+            // 
+            // btnDeleteBook
+            // 
+            btnDeleteBook.Location = new Point(730, 343);
+            btnDeleteBook.Name = "btnDeleteBook";
+            btnDeleteBook.Size = new Size(205, 23);
+            btnDeleteBook.TabIndex = 6;
+            btnDeleteBook.Text = "Deletar";
+            btnDeleteBook.UseVisualStyleBackColor = true;
+            btnDeleteBook.Click += btnDeleteBook_Click;
+            // 
+            // Dias
+            // 
+            Dias.Controls.Add(dgvTrackedDays);
+            Dias.Controls.Add(dateDayFilter);
+            Dias.Location = new Point(4, 24);
+            Dias.Name = "Dias";
+            Dias.Padding = new Padding(3);
+            Dias.Size = new Size(947, 514);
+            Dias.TabIndex = 1;
+            Dias.Text = "Dias";
+            Dias.UseVisualStyleBackColor = true;
+            // 
+            // dgvTrackedDays
+            // 
+            dgvTrackedDays.AutoGenerateColumns = false;
+            dgvTrackedDays.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvTrackedDays.Columns.AddRange(new DataGridViewColumn[] { TrackedDate });
+            dgvTrackedDays.DataSource = groupedDaysBindingSource;
+            dgvTrackedDays.Location = new Point(6, 44);
+            dgvTrackedDays.Name = "dgvTrackedDays";
+            dgvTrackedDays.Size = new Size(603, 455);
+            dgvTrackedDays.TabIndex = 1;
+            // 
+            // TrackedDate
+            // 
+            TrackedDate.DataPropertyName = "Date";
+            TrackedDate.HeaderText = "Data";
+            TrackedDate.Name = "TrackedDate";
+            TrackedDate.ReadOnly = true;
+            // 
+            // dateDayFilter
+            // 
+            dateDayFilter.CustomFormat = "";
+            dateDayFilter.Format = DateTimePickerFormat.Short;
+            dateDayFilter.Location = new Point(251, 15);
+            dateDayFilter.Name = "dateDayFilter";
+            dateDayFilter.Size = new Size(100, 23);
+            dateDayFilter.TabIndex = 0;
+            dateDayFilter.ValueChanged += dateTimePicker1_ValueChanged;
+            // 
+            // toolStrip1
+            // 
+            toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripButton1 });
+            toolStrip1.Location = new Point(0, 0);
+            toolStrip1.Name = "toolStrip1";
+            toolStrip1.Size = new Size(979, 25);
+            toolStrip1.TabIndex = 2;
+            toolStrip1.Text = "toolStrip1";
+            // 
+            // toolStripButton1
+            // 
+            toolStripButton1.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            toolStripButton1.Image = (Image)resources.GetObject("toolStripButton1.Image");
+            toolStripButton1.ImageTransparentColor = Color.Magenta;
+            toolStripButton1.Name = "toolStripButton1";
+            toolStripButton1.Size = new Size(23, 22);
+            toolStripButton1.Text = "toolStripButton1";
+            toolStripButton1.Click += toolStripButton1_Click;
+            // 
+            // statusStrip1
+            // 
+            statusStrip1.Location = new Point(0, 585);
+            statusStrip1.Name = "statusStrip1";
+            statusStrip1.Size = new Size(979, 22);
+            statusStrip1.TabIndex = 3;
+            statusStrip1.Text = "statusStrip1";
+            // 
+            // MainWindow
+            // 
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(979, 607);
+            Controls.Add(statusStrip1);
+            Controls.Add(toolStrip1);
+            Controls.Add(tabMainTabs);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            MaximizeBox = false;
+            Name = "MainWindow";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "Names";
+            Load += MainWindow_Load;
+            ((System.ComponentModel.ISupportInitialize)bookBindingSource).EndInit();
+            tabMainTabs.ResumeLayout(false);
+            Livros.ResumeLayout(false);
+            gboxBookInfo.ResumeLayout(false);
+            gboxBookInfo.PerformLayout();
+            gboxDias.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dgvMiniDays).EndInit();
+            ((System.ComponentModel.ISupportInitialize)miniDaysBindingSource).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dgvBooks).EndInit();
+            Dias.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dgvTrackedDays).EndInit();
+            ((System.ComponentModel.ISupportInitialize)groupedDaysBindingSource).EndInit();
+            toolStrip1.ResumeLayout(false);
+            toolStrip1.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
+        }
+
+        #endregion
+        private TabControl tabMainTabs;
+        private TabPage Livros;
+        private TabPage Dias;
+        private ToolStrip toolStrip1;
+        private StatusStrip statusStrip1;
+        private BindingSource bookBindingSource;
+        private DataGridView dgvBooks;
+        private ToolStripButton toolStripButton1;
+        private DataGridView dgvMiniDays;
+        private BindingSource miniDaysBindingSource;
+        private DataGridViewTextBoxColumn Date;
+        private DataGridViewTextBoxColumn CharsLido;
+        private DataGridViewTextBoxColumn Minutos;
+        private Button btnDeleteBook;
+        private GroupBox gboxDias;
+        private Label lblNome;
+        private GroupBox gboxBookInfo;
+        private DataGridViewTextBoxColumn bookIDDataGridViewTextBoxColumn;
+        private DataGridViewTextBoxColumn nameDataGridViewTextBoxColumn;
+        private DataGridViewTextBoxColumn authorDataGridViewTextBoxColumn;
+        private DataGridViewTextBoxColumn bookGenreDataGridViewTextBoxColumn;
+        private DataGridViewTextBoxColumn totalCharsDataGridViewTextBoxColumn;
+        private DataGridViewCheckBoxColumn isCompletedDataGridViewCheckBoxColumn;
+        private Label lblGenreInfo;
+        private DateTimePicker dateDayFilter;
+        private DataGridView dgvTrackedDays;
+        private BindingSource groupedDaysBindingSource;
+        private DataGridViewTextBoxColumn TrackedDate;
+        private Label lblChars;
+        private Label lbIsFinished;
+        private Label lblAuthor;
+        private Label lblGenre;
+        private Label lblIsFinishedInfo;
+        private Label lblAuthorInfo;
+        private Label lblCharsInfo;
+        private Label lblNoBookSelected;
+        private Label lblSelectedBook;
+    }
+}
+
+
+================================================
+FILE: ReadingTracker.GUI/MainWindow.resx
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!--
+    Microsoft ResX Schema
+
+    Version 2.0
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
+    associated with the data types.
+
+    Example:
+
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+
+    There are any number of "resheader" rows that contain simple
+    name/value pairs.
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
+    mimetype set.
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
+    extensible. For a given mimetype the value must be set accordingly:
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
+    read any of the formats listed below.
+
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <metadata name="bookBindingSource.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>237, 17</value>
+  </metadata>
+  <metadata name="Date.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+  <metadata name="CharsLido.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+  <metadata name="Minutos.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+  <metadata name="miniDaysBindingSource.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>395, 17</value>
+  </metadata>
+  <metadata name="TrackedDate.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+  <metadata name="groupedDaysBindingSource.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>575, 17</value>
+  </metadata>
+  <metadata name="toolStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>17, 17</value>
+  </metadata>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="toolStripButton1.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAACRSURBVDhPY/j27dt/SjDYACcnJ7IwigEf3n8kCZNswPNb
+        J/+f6DYF0yA+yQac6Db5f6hWCmwIiE+mC0wIu2DS2Vf/F1x6DefjwlgNyNr34r/0wkdgTMgQDAOQNRNj
+        CIoBOg0rMTTDMLIhIHbriZeYBmDTiIxBGkEYxge5liQDsGGQqykyAISpZwAlmIEywMAAAAc1/Jwvt6sN
+        AAAAAElFTkSuQmCC
+</value>
+  </data>
+  <metadata name="statusStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>122, 17</value>
+  </metadata>
+</root>
+
+
+================================================
+FILE: ReadingTracker.GUI/Program.cs
+================================================
+using ReadingTracker.Core.Repositories;
+using ReadingTracker.Core.Services;
+
+namespace ReadingTracker.GUI
+{
+    internal static class Program
+    {
+        /// <summary>
+        ///  The main entry point for the application.
+        /// </summary>
+        [STAThread]
+        static void Main()
+        {
+            // To customize application configuration such as set high DPI settings or default font,
+            // see https://aka.ms/applicationconfiguration.
+            ApplicationConfiguration.Initialize();
+
+            JsonRepository repo = new();
+            repo.Load();
+            ReadingService readingService = new(repo);
+
+            Application.Run(new MainWindow(readingService));
+        }
+    }
+}
+
+
+================================================
+FILE: ReadingTracker.GUI/ReadingTracker.GUI.csproj
+================================================
+ï»¿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WinForms.DataVisualization" Version="1.10.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ReadingTracker.Core\ReadingTracker.Core.csproj" />
+  </ItemGroup>
+
+</Project>
+
+
+================================================
+FILE: ReadingTracker.GUI/.resx
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!--
+    Microsoft ResX Schema
+
+    Version 2.0
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
+    associated with the data types.
+
+    Example:
+
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+
+    There are any number of "resheader" rows that contain simple
+    name/value pairs.
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
+    mimetype set.
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
+    extensible. For a given mimetype the value must be set accordingly:
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
+    read any of the formats listed below.
+
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <metadata name="contextMenuStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>132, 17</value>
+  </metadata>
+</root>
+
+
+================================================
+FILE: ReadingTracker.GUI/Properties/DataSources/ReadingTracker.Core.Data.Book.datasource
+================================================
+ï»¿<?xml version="1.0" encoding="utf-8"?>
+<!--
+    This file is automatically generated by Visual Studio. It is
+    used to store generic object data source configuration information.
+    Renaming the file extension or editing the content of this file may
+    cause the file to be unrecognizable by the program.
+-->
+<GenericObjectDataSource DisplayName="Book" Version="1.0" xmlns="urn:schemas-microsoft-com:xml-msdatasource">
+  <TypeInfo>ReadingTracker.Core.Data.Book, ReadingTracker.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</TypeInfo>
+</GenericObjectDataSource>
+
+
+================================================
+FILE: ReadingTracker.Tests/BookTests.cs
+================================================
+ï»¿using ReadingTracker.Core.Data;
+
+namespace ReadingTracker.Core.Tests
+{
+    public class BookTests
+    {
+        [Fact]
+        public void CalculatePercentRead_HalfRead_Returns50()
+        {
+            Book book = new();
+            book.TotalChars = 1000;
+
+            double result = book.CalculatePercentRead(500);
+
+            Assert.Equal(50.0, result);
+        }
+
+        [Fact]
+        public void CalculatePercentRead_ZeroTotal_ReturnsZero()
+        {
+            Book book = new();
+            book.TotalChars = 0;
+
+            double result = book.CalculatePercentRead(100);
+
+            Assert.Equal(0.0, result);
+        }
+
+        [Fact]
+        public void TestIdGeneration_AddBook()
+        {
+            InMemoryRepository repo = new();
+            Book book1 = new();
+            Book book2 = new();
+
+            repo.AddBook(book1);
+            repo.AddBook(book2);
+
+            Assert.Equal(1, book1.BookID);
+            Assert.Equal(2, book2.BookID);
+        }
+    }
+}
+
+
+
+================================================
+FILE: ReadingTracker.Tests/InMemoryRepository.cs
+================================================
+ï»¿using ReadingTracker.Core.Data;
+using ReadingTracker.Core.Repositories;
+
+namespace ReadingTracker.Core.Tests
+{
+    internal class InMemoryRepository : IReadingRepository
+    {
+
+        private readonly List<Book> _bookList = [];
+        private readonly List<TrackedDay> _daysList = [];
+
+        public void AddBook(Book book)
+        {
+            if (_bookList.Count == 0)
+            {
+                book.BookID = 1;
+            }
+            else
+            {
+                book.BookID = _bookList.Max(b => b.BookID) + 1;
+            }
+
+            _bookList.Add(book);
+        }
+
+        public void AddDay(TrackedDay day)
+        {
+            if (_daysList.Count == 0)
+            {
+                day.DayId = 1;
+            }
+            else
+            {
+                day.DayId = _daysList.Max(d => d.DayId) + 1;
+            }
+
+            _daysList.Add(day); _daysList.Sort((d1, d2) => d1.Date.CompareTo(d2.Date));
+        }
+
+        public List<Book> GetBooks()
+        {
+            return [.. _bookList];
+        }
+
+        public List<TrackedDay> GetDays()
+        {
+            return [.. _daysList];
+        }
+
+        public void RemoveBook(int bookId)
+        {
+            _bookList.RemoveAll(b => b.BookID == bookId);
+        }
+
+        public void RemoveDay(int dayId)
+        {
+            _daysList.RemoveAll(d => d.DayId == dayId);
+        }
+    }
+}
+
+
+
+================================================
+FILE: ReadingTracker.Tests/ReadingServiceTests.cs
+================================================
+ï»¿using ReadingTracker.Core.Data;
+using ReadingTracker.Core.Services;
+using ReadingTracker.Core.Tests;
+
+namespace ReadingTracker.Tests
+{
+    public class ReadingServiceTests
+    {
+        private static ReadingService CreateService(List<TrackedDay> existingDays, Book book)
+        {
+            InMemoryRepository repo = new();
+            repo.AddBook(book);
+            foreach (var day in existingDays)
+            {
+                repo.AddDay(day);
+            }
+            return new ReadingService(repo);
+        }
+
+        [Fact]
+        public void ValidateCharsRead_NegativeChars_ReturnsError()
+        {;
+            Book book = new() { TotalChars = 1000 };
+            ReadingService service = CreateService([], book);
+
+            string? result = service.ValidateCharsRead(book, -1);
+
+            Assert.NotNull(result);
+        }
+
+        [Fact]
+        public void ValidateCharsRead_ExceedsTotal_ReturnsError()
+        {
+            Book book = new() { BookID = 1, TotalChars = 1000 };
+            TrackedDay existingDay = new(book.BookID, DateOnly.FromDateTime(DateTime.Now), 800, 30);
+            ReadingService service = CreateService([existingDay], book);
+
+            string? result = service.ValidateCharsRead(book, 300);
+
+            Assert.NotNull(result);
+        }
+
+        [Fact]
+        public void ValidateCharsRead_ExactlyRemaining_ReturnsNull()
+        {
+            Book book = new() { BookID = 1, TotalChars = 1000 };
+            TrackedDay existingDay = new(book.BookID, DateOnly.FromDateTime(DateTime.Now), 800, 30);
+            ReadingService service = CreateService([existingDay], book);
+
+            string? result = service.ValidateCharsRead(book, 200);
+
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void ValidateCharsRead_ValidAmount_ReturnsNull()
+        {
+            Book book = new() { TotalChars = 1000 };
+            ReadingService service = CreateService([], book);
+
+            string? result = service.ValidateCharsRead(book, 800);
+
+            Assert.Null(result);
+        }
+    }
+}
+
+
+
+================================================
+FILE: ReadingTracker.Tests/ReadingTracker.Tests.csproj
+================================================
+ï»¿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ReadingTracker.Core\ReadingTracker.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+</Project>
+
+
+================================================
+FILE: .agents/rules/tutor-guide.md
+================================================
+---
+trigger: always_on
+---
+
+```
+You are a patient, rigorous C# tutor. Your primary role is to help me understand
+code deeply â€” not to write it for me.
+
+## Your Core Behavior
+
+**Do not generate code unless I explicitly ask with the phrase "write this for me".**
+If I ask how to do something, explain the concept, the reasoning, and the relevant
+C# mechanics. Let me attempt the implementation first.
+
+When I share code I have written:
+- Analyze it line by line if I ask, or give a high-level review if I ask for that.
+- Point out what I got right before addressing problems.
+- Explain *why* something is wrong, not just what to change.
+- Ask me guiding questions to help me find the fix myself ("What do you think this
+  line is actually doing? What does `ref` mean here?").
+- Only show corrected code if I am stuck after genuinely trying.
+
+## How to Explain Things
+
+- Assume I am a beginner to C# but an intelligent adult. Do not oversimplify, but
+  do define jargon the first time you use it.
+- Prefer plain language over abstract theory. Use short, concrete examples to
+  illustrate a concept â€” but write those examples yourself only as a last resort;
+  first ask me to try writing one.
+- When a concept has a "why it exists" story (e.g., why `struct` vs `class`, why
+  `async/await` was introduced), tell it. Context helps me retain things.
+- Connect new concepts to things I already know from previous sessions when possible.
+
+## Code Analysis Protocol
+
+When I paste code for review, follow this structure:
+
+1. **Intent check** â€” Ask what I was trying to accomplish, if it is not obvious.
+2. **What works** â€” Acknowledge correct patterns and good instincts.
+3. **What to examine** â€” Flag suspicious or incorrect areas with an explanation of
+   the underlying rule, not just a fix.
+4. **Guided correction** â€” Ask me a Socratic question to help me find the fix.
+5. **Confirm understanding** â€” After I fix it, ask me to explain *why* the fix works.
+
+## Topics I Am Focused On
+
+- C# fundamentals: types, value vs reference types, nullability, collections
+- Object-oriented principles in C#: classes, interfaces, inheritance, encapsulation
+- Memory and execution model: stack vs heap, garbage collection basics
+- Common patterns in internal/enterprise .NET: dependency injection, SOLID principles
+- Reading and understanding existing codebases before writing new code
+
+## What I Do Not Want
+
+- Do not complete my sentences in code. If I am mid-way through a snippet, do not
+  finish it unprompted.
+- Do not suggest libraries or frameworks as shortcuts. I want to understand the
+  language first.
+- Do not give me the answer disguised as a hint. If you are going to tell me the
+  answer, be honest that you are doing so.
+- Do not skip steps because something "should be obvious." Nothing is obvious to a
+  beginner.
+
+## My Goal
+
+I am preparing for my first developer role. I want to be the kind of developer who
+understands what their code does, not one who pastes AI output without comprehension.
+Hold me to that standard. Push back if I try to take shortcuts.
+

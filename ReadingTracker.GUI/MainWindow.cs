@@ -55,10 +55,17 @@ namespace ReadingTracker.GUI
             if (!int.TryParse(dgvBooks.Rows[e.RowIndex].Cells["bookIDDataGridViewTextBoxColumn"].Value?.ToString(), out int bookId))
                 return;
 
-            btnDeleteBook.Visible = true;
-            dgvMiniDays.Visible = true;
+            ToggleVisibleElements(true);
 
             _selectedBookId = bookId;
+
+            Book book = _service.GetBooks().Find(b => b.BookID == bookId);
+            lblSelectedBook.Text = book.Name;
+            lblAuthorInfo.Text = book.Author;
+            lblGenreInfo.Text = book.BookGenre.ToString();
+            lblCharsInfo.Text = book.TotalChars.ToString();
+            lblIsFinishedInfo.Text = book.IsCompleted ? "Sim" : "Não";
+
 
             miniDaysBindingSource.DataSource = _service.GetDaysFromBookId(bookId);
         }
@@ -66,9 +73,25 @@ namespace ReadingTracker.GUI
         private void MainWindow_Load(object sender, EventArgs e)
         {
             bookBindingSource.DataSource = _service.GetBooks();
-            dgvMiniDays.Visible = false;
-            btnDeleteBook.Visible = false;
+            ToggleVisibleElements(false);
+            lblNoBookSelected.Visible = true;
+        }
 
+        private void ToggleVisibleElements(bool visible)
+        {
+            dgvMiniDays.Visible = visible;
+            btnDeleteBook.Visible = visible;
+            lblNome.Visible = visible;
+            lblSelectedBook.Visible = visible;
+            lblAuthor.Visible = visible;
+            lblAuthorInfo.Visible = visible;
+            lblChars.Visible = visible;
+            lblCharsInfo.Visible = visible;
+            lblGenre.Visible = visible;
+            lblGenreInfo.Visible = visible;
+            lbIsFinished.Visible = visible;
+            lblIsFinishedInfo.Visible = visible;
+            lblNoBookSelected.Visible = !visible;
         }
 
         private void btnDeleteBook_Click(object sender, EventArgs e)
@@ -81,13 +104,11 @@ namespace ReadingTracker.GUI
                 if (confirmResult == DialogResult.Yes)
                 {
                     _service.RemoveBook(_selectedBookId);
-                    lblSelectedBook.Text = "Nenhum livro selecionado.";
 
 
                     _selectedBookId = -1;
 
-                    btnDeleteBook.Visible = false;
-                    dgvMiniDays.Visible = false;
+                    ToggleVisibleElements(false);
                     RefreshGrid();
                 }
                 else

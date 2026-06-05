@@ -35,6 +35,15 @@
             tabMainTabs = new TabControl();
             Livros = new TabPage();
             gboxBookInfo = new GroupBox();
+            lblNoBookSelected = new Label();
+            lblIsFinishedInfo = new Label();
+            lblAuthorInfo = new Label();
+            lblCharsInfo = new Label();
+            lblGenreInfo = new Label();
+            lblChars = new Label();
+            lbIsFinished = new Label();
+            lblAuthor = new Label();
+            lblGenre = new Label();
             lblNome = new Label();
             lblSelectedBook = new Label();
             gboxDias = new GroupBox();
@@ -53,12 +62,12 @@
             btnDeleteBook = new Button();
             Dias = new TabPage();
             dgvTrackedDays = new DataGridView();
+            TrackedDate = new DataGridViewTextBoxColumn();
+            groupedDaysBindingSource = new BindingSource(components);
             dateDayFilter = new DateTimePicker();
             toolStrip1 = new ToolStrip();
             toolStripButton1 = new ToolStripButton();
             statusStrip1 = new StatusStrip();
-            groupedDaysBindingSource = new BindingSource(components);
-            TrackedDate = new DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)bookBindingSource).BeginInit();
             tabMainTabs.SuspendLayout();
             Livros.SuspendLayout();
@@ -69,8 +78,8 @@
             ((System.ComponentModel.ISupportInitialize)dgvBooks).BeginInit();
             Dias.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvTrackedDays).BeginInit();
-            toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)groupedDaysBindingSource).BeginInit();
+            toolStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // bookBindingSource
@@ -103,6 +112,15 @@
             // 
             // gboxBookInfo
             // 
+            gboxBookInfo.Controls.Add(lblNoBookSelected);
+            gboxBookInfo.Controls.Add(lblIsFinishedInfo);
+            gboxBookInfo.Controls.Add(lblAuthorInfo);
+            gboxBookInfo.Controls.Add(lblCharsInfo);
+            gboxBookInfo.Controls.Add(lblGenreInfo);
+            gboxBookInfo.Controls.Add(lblChars);
+            gboxBookInfo.Controls.Add(lbIsFinished);
+            gboxBookInfo.Controls.Add(lblAuthor);
+            gboxBookInfo.Controls.Add(lblGenre);
             gboxBookInfo.Controls.Add(lblNome);
             gboxBookInfo.Controls.Add(lblSelectedBook);
             gboxBookInfo.Location = new Point(724, 6);
@@ -111,6 +129,78 @@
             gboxBookInfo.TabIndex = 9;
             gboxBookInfo.TabStop = false;
             gboxBookInfo.Text = "Informações do Livro";
+            // 
+            // lblNoBookSelected
+            // 
+            lblNoBookSelected.Location = new Point(30, 33);
+            lblNoBookSelected.Name = "lblNoBookSelected";
+            lblNoBookSelected.Size = new Size(156, 15);
+            lblNoBookSelected.TabIndex = 13;
+            lblNoBookSelected.Text = "Nenhum livro selecionado.";
+            // 
+            // lblIsFinishedInfo
+            // 
+            lblIsFinishedInfo.Location = new Point(75, 107);
+            lblIsFinishedInfo.Name = "lblIsFinishedInfo";
+            lblIsFinishedInfo.Size = new Size(133, 15);
+            lblIsFinishedInfo.TabIndex = 12;
+            // 
+            // lblAuthorInfo
+            // 
+            lblAuthorInfo.Location = new Point(52, 62);
+            lblAuthorInfo.Name = "lblAuthorInfo";
+            lblAuthorInfo.Size = new Size(156, 15);
+            lblAuthorInfo.TabIndex = 11;
+            // 
+            // lblCharsInfo
+            // 
+            lblCharsInfo.Location = new Point(75, 92);
+            lblCharsInfo.Name = "lblCharsInfo";
+            lblCharsInfo.Size = new Size(133, 15);
+            lblCharsInfo.TabIndex = 11;
+            // 
+            // lblGenreInfo
+            // 
+            lblGenreInfo.Location = new Point(55, 77);
+            lblGenreInfo.Name = "lblGenreInfo";
+            lblGenreInfo.Size = new Size(156, 15);
+            lblGenreInfo.TabIndex = 11;
+            // 
+            // lblChars
+            // 
+            lblChars.AutoSize = true;
+            lblChars.Location = new Point(6, 92);
+            lblChars.Name = "lblChars";
+            lblChars.Size = new Size(65, 15);
+            lblChars.TabIndex = 10;
+            lblChars.Text = "Caracteres:";
+            // 
+            // lbIsFinished
+            // 
+            lbIsFinished.AutoSize = true;
+            lbIsFinished.Location = new Point(6, 107);
+            lbIsFinished.Name = "lbIsFinished";
+            lbIsFinished.Size = new Size(63, 15);
+            lbIsFinished.TabIndex = 10;
+            lbIsFinished.Text = "Finalizado:";
+            // 
+            // lblAuthor
+            // 
+            lblAuthor.AutoSize = true;
+            lblAuthor.Location = new Point(6, 62);
+            lblAuthor.Name = "lblAuthor";
+            lblAuthor.Size = new Size(40, 15);
+            lblAuthor.TabIndex = 9;
+            lblAuthor.Text = "Autor:";
+            // 
+            // lblGenre
+            // 
+            lblGenre.AutoSize = true;
+            lblGenre.Location = new Point(6, 77);
+            lblGenre.Name = "lblGenre";
+            lblGenre.Size = new Size(48, 15);
+            lblGenre.TabIndex = 9;
+            lblGenre.Text = "Gênero:";
             // 
             // lblNome
             // 
@@ -125,9 +215,8 @@
             // 
             lblSelectedBook.Location = new Point(55, 19);
             lblSelectedBook.Name = "lblSelectedBook";
-            lblSelectedBook.Size = new Size(156, 53);
-            lblSelectedBook.TabIndex = 4;
-            lblSelectedBook.Text = "Nenhum livro selecionado";
+            lblSelectedBook.Size = new Size(153, 44);
+            lblSelectedBook.TabIndex = 14;
             // 
             // gboxDias
             // 
@@ -143,6 +232,8 @@
             // 
             dgvMiniDays.AllowUserToAddRows = false;
             dgvMiniDays.AllowUserToDeleteRows = false;
+            dgvMiniDays.AllowUserToResizeColumns = false;
+            dgvMiniDays.AllowUserToResizeRows = false;
             dgvMiniDays.AutoGenerateColumns = false;
             dgvMiniDays.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
@@ -162,6 +253,7 @@
             dgvMiniDays.RowHeadersVisible = false;
             dgvMiniDays.RowHeadersWidth = 30;
             dgvMiniDays.RowTemplate.Height = 20;
+            dgvMiniDays.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvMiniDays.Size = new Size(202, 150);
             dgvMiniDays.TabIndex = 5;
             // 
@@ -190,18 +282,27 @@
             // 
             dgvBooks.AllowUserToAddRows = false;
             dgvBooks.AllowUserToDeleteRows = false;
+            dgvBooks.AllowUserToResizeColumns = false;
+            dgvBooks.AllowUserToResizeRows = false;
             dgvBooks.AutoGenerateColumns = false;
+            dgvBooks.BackgroundColor = SystemColors.Control;
             dgvBooks.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvBooks.Columns.AddRange(new DataGridViewColumn[] { bookIDDataGridViewTextBoxColumn, nameDataGridViewTextBoxColumn, authorDataGridViewTextBoxColumn, bookGenreDataGridViewTextBoxColumn, totalCharsDataGridViewTextBoxColumn, isCompletedDataGridViewCheckBoxColumn });
             dgvBooks.DataSource = bookBindingSource;
             dgvBooks.Dock = DockStyle.Left;
+            dgvBooks.GridColor = SystemColors.Control;
             dgvBooks.Location = new Point(3, 3);
+            dgvBooks.MultiSelect = false;
             dgvBooks.Name = "dgvBooks";
             dgvBooks.ReadOnly = true;
             dgvBooks.RowHeadersVisible = false;
+            dgvBooks.RowTemplate.Height = 20;
+            dgvBooks.RowTemplate.ReadOnly = true;
             dgvBooks.ScrollBars = ScrollBars.None;
+            dgvBooks.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvBooks.Size = new Size(715, 508);
             dgvBooks.TabIndex = 0;
+            dgvBooks.VirtualMode = true;
             dgvBooks.CellMouseClick += dgvBooks_CellMouseClick;
             // 
             // bookIDDataGridViewTextBoxColumn
@@ -286,6 +387,13 @@
             dgvTrackedDays.Size = new Size(603, 455);
             dgvTrackedDays.TabIndex = 1;
             // 
+            // TrackedDate
+            // 
+            TrackedDate.DataPropertyName = "Date";
+            TrackedDate.HeaderText = "Data";
+            TrackedDate.Name = "TrackedDate";
+            TrackedDate.ReadOnly = true;
+            // 
             // dateDayFilter
             // 
             dateDayFilter.CustomFormat = "";
@@ -323,13 +431,6 @@
             statusStrip1.TabIndex = 3;
             statusStrip1.Text = "statusStrip1";
             // 
-            // TrackedDate
-            // 
-            TrackedDate.DataPropertyName = "Date";
-            TrackedDate.HeaderText = "Data";
-            TrackedDate.Name = "TrackedDate";
-            TrackedDate.ReadOnly = true;
-            // 
             // MainWindow
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -355,9 +456,9 @@
             ((System.ComponentModel.ISupportInitialize)dgvBooks).EndInit();
             Dias.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgvTrackedDays).EndInit();
+            ((System.ComponentModel.ISupportInitialize)groupedDaysBindingSource).EndInit();
             toolStrip1.ResumeLayout(false);
             toolStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)groupedDaysBindingSource).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -371,7 +472,6 @@
         private BindingSource bookBindingSource;
         private DataGridView dgvBooks;
         private ToolStripButton toolStripButton1;
-        private Label lblSelectedBook;
         private DataGridView dgvMiniDays;
         private BindingSource miniDaysBindingSource;
         private DataGridViewTextBoxColumn Date;
@@ -387,10 +487,19 @@
         private DataGridViewTextBoxColumn bookGenreDataGridViewTextBoxColumn;
         private DataGridViewTextBoxColumn totalCharsDataGridViewTextBoxColumn;
         private DataGridViewCheckBoxColumn isCompletedDataGridViewCheckBoxColumn;
-        private Label label1;
+        private Label lblGenreInfo;
         private DateTimePicker dateDayFilter;
         private DataGridView dgvTrackedDays;
         private BindingSource groupedDaysBindingSource;
         private DataGridViewTextBoxColumn TrackedDate;
+        private Label lblChars;
+        private Label lbIsFinished;
+        private Label lblAuthor;
+        private Label lblGenre;
+        private Label lblIsFinishedInfo;
+        private Label lblAuthorInfo;
+        private Label lblCharsInfo;
+        private Label lblNoBookSelected;
+        private Label lblSelectedBook;
     }
 }
